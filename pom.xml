@@ -18,12 +18,14 @@
         <lombok.version>1.18.8</lombok.version>
         <fastjson.version>1.2.71</fastjson.version>
         <commons-io.version>2.6</commons-io.version>
+        <protostuff.version>1.7.2</protostuff.version>
     </properties>
     <modules>
         <module>io-elves-http</module>
         <module>io-elves-common</module>
         <module>io-elves-core</module>
         <module>io-elves-simple-http-server</module>
+        <module>io-elves-all</module>
     </modules>
 
 
@@ -102,6 +104,16 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${commons-io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.protostuff</groupId>
+                <artifactId>protostuff-core</artifactId>
+                <version>${protostuff.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.protostuff</groupId>
+                <artifactId>protostuff-runtime</artifactId>
+                <version>${protostuff.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

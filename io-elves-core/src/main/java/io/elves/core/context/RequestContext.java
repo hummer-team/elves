@@ -1,9 +1,10 @@
 package io.elves.core.context;
 
-import io.elves.core.encoder.Decoder;
+import io.elves.core.coder.Coder;
 import io.netty.handler.codec.http.HttpHeaders;
 import org.apache.commons.lang3.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,24 +21,24 @@ public class RequestContext {
     private HttpHeaders headers;
     private String contentType;
     private byte[] body;
-    private Decoder decoder;
+    private Coder decoder;
 
     public static RequestContext build() {
         return new RequestContext();
     }
 
-    public <T> T body(Class<?> clazz) {
+    public <T> T body(Class<T> clazz) {
         if (decoder == null) {
             throw new IllegalArgumentException("decoder not found");
         }
-        return decoder.decode(getBodyByte(), clazz);
+        return decoder.decode(getBodyByte(), clazz, StandardCharsets.UTF_8);
     }
 
-    public Decoder getDecoder() {
+    public Coder getDecoder() {
         return decoder;
     }
 
-    public RequestContext decoder(Decoder decoder) {
+    public RequestContext decoder(Coder decoder) {
         this.decoder = decoder;
         return this;
     }

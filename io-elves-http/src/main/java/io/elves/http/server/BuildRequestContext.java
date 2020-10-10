@@ -1,7 +1,7 @@
 package io.elves.http.server;
 
 import io.elves.core.context.RequestContext;
-import io.elves.core.encoder.CodecContainer;
+import io.elves.core.coder.CodecContainer;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.QueryStringDecoder;
@@ -32,7 +32,7 @@ public class BuildRequestContext {
                 .build()
                 .headers(request.headers())
                 .contentType(request.headers().get("Content-Type"))
-                .decoder(CodecContainer.getDecoder(request.headers().get("Content-Type")))
+                .decoder(CodecContainer.getCoder(request.headers().get("Content-Type")))
                 .param(parseQueryParam(queryStringDecoder))
                 .param(parsePostParam(request))
                 .body(parseBodyByte(request))

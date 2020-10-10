@@ -9,16 +9,20 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>io-elves-core</artifactId>
+    <artifactId>io-elves-all</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
+            <groupId>io.elves</groupId>
+            <artifactId>io-elves-common</artifactId>
         </dependency>
         <dependency>
             <groupId>io.elves</groupId>
-            <artifactId>io-elves-common</artifactId>
+            <artifactId>io-elves-http</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.elves</groupId>
+            <artifactId>io-elves-core</artifactId>
         </dependency>
     </dependencies>
 </project>

@@ -3,10 +3,10 @@ package io.elves.http.server;
 
 import com.google.common.base.Strings;
 import io.elves.common.util.IpUtil;
+import io.elves.core.coder.Coder;
 import io.elves.core.command.CommandHandlerContainer;
 import io.elves.core.context.RequestContext;
-import io.elves.core.encoder.CodecContainer;
-import io.elves.core.encoder.Encoder;
+import io.elves.core.coder.CodecContainer;
 import io.elves.core.handle.CommandHandle;
 import io.elves.core.response.CommandResponse;
 import io.netty.buffer.Unpooled;
@@ -101,12 +101,12 @@ public class DispatchCommandHandler extends SimpleChannelInboundHandler<Object> 
                 , keepAlive);
     }
 
-    private Encoder lookupEncoder(Class<?> clazz, String requestContextType) {
+    private Coder lookupEncoder(Class<?> clazz, String requestContextType) {
         if (clazz == null) {
             throw new IllegalArgumentException("Bad class metadata");
         }
 
-        Encoder encoder = CodecContainer.getEncoder(requestContextType);
+        Coder encoder = CodecContainer.getCoder(requestContextType);
         if (encoder == null) {
             log.error("command handle encoder {} not support", requestContextType);
             throw new IllegalArgumentException("Bad server encoder");
@@ -136,8 +136,8 @@ public class DispatchCommandHandler extends SimpleChannelInboundHandler<Object> 
             if (response.getData() == null) {
                 body = new byte[]{};
             } else {
-                Encoder encoder = lookupEncoder(response.getData().getClass(), requestContextType);
-                body = encoder.encode(response);
+                Coder encoder = lookupEncoder(response.getData().getClass(), requestContextType);
+                body = encoder.encode(response,StandardCharsets.UTF_8);
             }
         } else {
             body = response.getExceptionMessage() != null
