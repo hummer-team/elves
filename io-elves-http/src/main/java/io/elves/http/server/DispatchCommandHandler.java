@@ -137,6 +137,7 @@ public class DispatchCommandHandler extends SimpleChannelInboundHandler<Object> 
                 body = new byte[]{};
             } else {
                 Coder encoder = lookupEncoder(response.getData().getClass(), requestContextType);
+                assert encoder != null;
                 body = encoder.encode(response,StandardCharsets.UTF_8);
             }
         } else {
