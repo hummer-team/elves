@@ -1,5 +1,5 @@
 /*
- * Copyright 1999-2018 Alibaba Group Holding Ltd.
+ * Copyright 1999-2020 panli Group Holding Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,9 @@ import java.nio.charset.Charset;
 /**
  * The decoder decodes bytes into an object of type {@code <R>}.
  *
- * @param <R> target type
  * @author lee
  */
-public interface Decoder<R> {
+public interface Decoder {
 
     /**
      * Check whether the decoder supports the given target type.
@@ -39,7 +38,7 @@ public interface Decoder<R> {
      * @param bytes raw byte buffer
      * @return the decoded target object
      */
-    R decode(byte[] bytes);
+    <T> T decode(byte[] bytes,Class<?> target);
 
     /**
      * Decode the given byte array into an object of type {@code R} with the given charset.
@@ -48,7 +47,7 @@ public interface Decoder<R> {
      * @param charset the charset
      * @return the decoded target object
      */
-    R decode(byte[] bytes, Charset charset);
+    <T> T decode(byte[] bytes,Class<?> target, Charset charset);
 
     /**
      * decode name . ig: application/json or text/plain

@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSON;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-public class JsonEncoder implements Encoder<Object> {
+public class JsonEncoder implements Encoder {
     /**
      * Check whether the encoder supports the given source type.
      *
@@ -20,25 +20,25 @@ public class JsonEncoder implements Encoder<Object> {
     /**
      * Encode the given object into a byte array with the given charset.
      *
-     * @param o       the object to encode
+     * @param r       the object to encode
      * @param charset the charset
      * @return the encoded byte buffer
      * @throws Exception error occurs when encoding the object (e.g. IO fails)
      */
     @Override
-    public byte[] encode(Object o, Charset charset) {
-        return JSON.toJSONBytes(o);
+    public <R> byte[] encode(R r, Charset charset) {
+        return JSON.toJSONBytes(r);
     }
 
     /**
      * Encode the given object into a byte array with the default charset.
      *
-     * @param o the object to encode
+     * @param r the object to encode
      * @return the encoded byte buffer, witch is already flipped.
      */
     @Override
-    public byte[] encode(Object o) {
-        return encode(o, StandardCharsets.UTF_8);
+    public <R> byte[] encode(R r) {
+        return encode(r, StandardCharsets.UTF_8);
     }
 
     /**

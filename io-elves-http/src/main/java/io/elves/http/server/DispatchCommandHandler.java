@@ -1,6 +1,8 @@
 package io.elves.http.server;
 
 
+import com.google.common.base.Strings;
+import io.elves.common.util.IpUtil;
 import io.elves.core.command.CommandHandlerContainer;
 import io.elves.core.context.RequestContext;
 import io.elves.core.encoder.CodecContainer;
@@ -16,25 +18,19 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
-import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
-import io.netty.handler.codec.http.QueryStringDecoder;
-import io.netty.handler.codec.http.multipart.HttpData;
-import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
-import io.netty.handler.codec.http.multipart.InterfaceHttpData;
-import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.MDC;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.UUID;
 
-import static io.elves.core.context.RequestContext.COMMAND_TARGET;
+import static io.elves.core.ElvesConstants.FAVICON_PATH;
+import static io.elves.core.ElvesConstants.REQUEST_ID_KEY;
+import static io.elves.core.ElvesConstants.SERVER_IP_KEY;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 import static io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND;
@@ -42,13 +38,11 @@ import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 
 /**
  * Netty-based HTTP server handler for command center.
- * <p>
- * Note: HTTP chunked is not tested!
  *
  * @author leee
  */
 @Slf4j
-public class DispatchHttpCommandHandler extends SimpleChannelInboundHandler<Object> {
+public class DispatchCommandHandler extends SimpleChannelInboundHandler<Object> {
     /**
      * Calls {@link ChannelHandlerContext#fireExceptionCaught(Throwable)} to forward
      * to the next {@link io.netty.channel.ChannelHandler} in the {@link io.netty.channel.ChannelPipeline}.
@@ -72,7 +66,14 @@ public class DispatchHttpCommandHandler extends SimpleChannelInboundHandler<Obje
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
         FullHttpRequest httpRequest = (FullHttpRequest) msg;
-        RequestContext request = parseRequest(httpRequest);
+        //ignore request favicon.ico
+        if (FAVICON_PATH.equals(httpRequest.uri())) {
+            return;
+        }
+
+        setRequestId(httpRequest);
+        RequestContext request = BuildRequestContext.parseRequest(httpRequest);
+
         try {
             if (StringUtils.isBlank(request.getCommandName())) {
                 writeErrorResponse(BAD_REQUEST.code(), "Invalid command", ctx);
@@ -94,15 +95,18 @@ public class DispatchHttpCommandHandler extends SimpleChannelInboundHandler<Obje
             writeErrorResponse(NOT_FOUND.code(), String.format("not found -> \"%s\"", request.getCommandName()), ctx);
             return;
         }
-        writeResponse(commandHandler.handle(request), request, ctx, keepAlive);
+        writeResponse(commandHandler.handle(request)
+                , request
+                , ctx
+                , keepAlive);
     }
 
-    private Encoder<?> lookupEncoder(Class<?> clazz, String requestContextType) {
+    private Encoder lookupEncoder(Class<?> clazz, String requestContextType) {
         if (clazz == null) {
             throw new IllegalArgumentException("Bad class metadata");
         }
 
-        Encoder<?> encoder = CodecContainer.getEncoder(requestContextType);
+        Encoder encoder = CodecContainer.getEncoder(requestContextType);
         if (encoder == null) {
             log.error("command handle encoder {} not support", requestContextType);
             throw new IllegalArgumentException("Bad server encoder");
@@ -126,19 +130,18 @@ public class DispatchHttpCommandHandler extends SimpleChannelInboundHandler<Obje
         ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
     }
 
-    private byte[] getResponseByte(CommandResponse response, String requestContextType, ChannelHandlerContext ctx)
-            throws Exception {
+    private byte[] encodeResponseBody(CommandResponse response, String requestContextType) {
         byte[] body = new byte[]{};
         if (response.getCode() == 0) {
             if (response.getData() == null) {
                 body = new byte[]{};
             } else {
                 Encoder encoder = lookupEncoder(response.getData().getClass(), requestContextType);
-                body = encoder.encode(response.getData());
+                body = encoder.encode(response);
             }
         } else {
             body = response.getExceptionMessage() != null
-                    ? response.getExceptionMessage().getBytes("UTF-8")
+                    ? response.getExceptionMessage().getBytes(StandardCharsets.UTF_8)
                     : body;
         }
         return body;
@@ -146,10 +149,9 @@ public class DispatchHttpCommandHandler extends SimpleChannelInboundHandler<Obje
 
     private void writeResponse(CommandResponse response
             , RequestContext request
-            , ChannelHandlerContext ctx, boolean keepAlive)
-            throws Exception {
+            , ChannelHandlerContext ctx, boolean keepAlive) {
 
-        byte[] body = getResponseByte(response, request.getHeaders().get("Content-Type"), ctx);
+        byte[] body = encodeResponseBody(response, request.getContentType());
 
         HttpResponseStatus status = response.getCode() == 0 ? OK : BAD_REQUEST;
 
@@ -157,7 +159,7 @@ public class DispatchHttpCommandHandler extends SimpleChannelInboundHandler<Obje
                 Unpooled.copiedBuffer(body));
 
         httpResponse.headers().set("Content-Type", String.format("%s; charset=UTF-8"
-                ,request.getHeaders().get("Content-Type")));
+                , request.getContentType()));
         httpResponse.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
         if (keepAlive) {
             httpResponse.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
@@ -167,65 +169,10 @@ public class DispatchHttpCommandHandler extends SimpleChannelInboundHandler<Obje
         ctx.write(httpResponse);
     }
 
-    private RequestContext parseRequest(FullHttpRequest request) {
-        QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.uri());
-        RequestContext serverRequest = new RequestContext();
-        serverRequest.addHeaders(request.headers());
-
-        Map<String, List<String>> paramMap = queryStringDecoder.parameters();
-        // Parse request parameters.
-        if (!paramMap.isEmpty()) {
-            for (Entry<String, List<String>> p : paramMap.entrySet()) {
-                if (!p.getValue().isEmpty()) {
-                    serverRequest.addParam(p.getKey(), p.getValue().get(0));
-                }
-            }
-        }
-        // Deal with post method, parameter in post has more privilege compared to that in querystring
-        if (request.method().equals(HttpMethod.POST)) {
-            // support multi-part and form-urlencoded
-            HttpPostRequestDecoder postRequestDecoder = null;
-            try {
-                postRequestDecoder = new HttpPostRequestDecoder(request);
-                for (InterfaceHttpData data : postRequestDecoder.getBodyHttpDatas()) {
-                    data.retain(); // must retain each attr before destroy
-                    if (data.getHttpDataType() == HttpDataType.Attribute) {
-                        if (data instanceof HttpData) {
-                            HttpData httpData = (HttpData) data;
-                            try {
-                                String name = httpData.getName();
-                                String value = httpData.getString();
-                                serverRequest.addParam(name, value);
-                            } catch (IOException e) {
-                                //
-                            }
-                        }
-                    }
-                }
-            } finally {
-                if (postRequestDecoder != null) {
-                    postRequestDecoder.destroy();
-                }
-            }
-        }
-        // parse target command name.
-        String target = parseTarget(queryStringDecoder.rawPath(), request.method());
-        serverRequest.addMetadata(COMMAND_TARGET, target);
-        // Parse body.
-        if (request.content().readableBytes() <= 0) {
-            serverRequest.setBody(null);
-        } else {
-            byte[] body = new byte[request.content().readableBytes()];
-            request.content().getBytes(0, body);
-            serverRequest.setBody(body);
-        }
-        return serverRequest;
-    }
-
-    private String parseTarget(String uri, HttpMethod method) {
-        if (StringUtils.isEmpty(uri)) {
-            return String.format("-%s", method);
-        }
-        return String.format("%s-%s", uri, method);
+    private void setRequestId(FullHttpRequest httpRequest) {
+        MDC.put(REQUEST_ID_KEY, Strings.isNullOrEmpty(httpRequest.headers().get(REQUEST_ID_KEY))
+                ? UUID.randomUUID().toString().replaceAll("-", "").toLowerCase()
+                : httpRequest.headers().get(REQUEST_ID_KEY));
+        MDC.put(SERVER_IP_KEY, IpUtil.getLocalIp());
     }
 }

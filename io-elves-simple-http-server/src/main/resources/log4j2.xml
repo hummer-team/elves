@@ -95,7 +95,7 @@
 		<Logger name="org.apache" level="error" />
 		<Logger name="io.undertow" level="info"/>
 		<Logger name="springfox.documentation" level="error" />
-		<Root level="debug">
+		<Root level="info">
 			<appender-ref ref="Console" />
 			<appender-ref ref="LogstashFile" />
 			<appender-ref ref="RollingErrorFile" />

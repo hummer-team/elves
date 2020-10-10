@@ -1,5 +1,5 @@
 /*
- * Copyright 1999-2018 Alibaba Group Holding Ltd.
+ * Copyright 1999-2020 panli Group Holding Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class CodecContainer {
 
-    private static final Map<String, Encoder<?>> encoderMap = new ConcurrentHashMap<>();
-    private static final Map<String, Decoder<?>> decoderMap = new ConcurrentHashMap<>();
+    private static final Map<String, Encoder> encoderMap = new ConcurrentHashMap<>();
+    private static final Map<String, Decoder> decoderMap = new ConcurrentHashMap<>();
 
     static {
         // Register default codecs.
@@ -40,20 +40,20 @@ public final class CodecContainer {
 
     }
 
-    public static void registerEncoder(Encoder<?> encoder) {
+    public static void registerEncoder(Encoder encoder) {
         encoderMap.put(encoder.encodeName(), encoder);
     }
 
-    public static void registerDecoder(Decoder<?> decoder) {
+    public static void registerDecoder(Decoder decoder) {
         decoderMap.put(decoder.decodeName(), decoder);
     }
 
-    public static Encoder<?> getEncoder(String encodeName) {
+    public static Encoder getEncoder(String encodeName) {
         String name = Strings.isNullOrEmpty(encodeName) ? "text/plain" : encodeName;
         return encoderMap.get(name);
     }
 
-    public static Decoder<?> getDecoder(String decoderName) {
+    public static Decoder getDecoder(String decoderName) {
         return decoderMap.get(decoderName);
     }
 

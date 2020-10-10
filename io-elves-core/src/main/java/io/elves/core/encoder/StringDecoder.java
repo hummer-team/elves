@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 panli Group Holding Ltd.
+ * Copyright 1999-2020 panli Group Holding Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
  *
  * @author lee
  */
-public class StringDecoder implements Decoder<String> {
+public class StringDecoder implements Decoder {
 
     @Override
     public boolean canDecode(Class<?> clazz) {
@@ -31,16 +31,16 @@ public class StringDecoder implements Decoder<String> {
     }
 
     @Override
-    public String decode(byte[] bytes) {
-        return decode(bytes, StandardCharsets.UTF_8);
+    public <T> T decode(byte[] bytes, Class<?> target) {
+        return decode(bytes, target, StandardCharsets.UTF_8);
     }
 
     @Override
-    public String decode(byte[] bytes, Charset charset) {
+    public <T> T decode(byte[] bytes, Class<?> target, Charset charset) {
         if (bytes == null || bytes.length <= 0) {
             throw new IllegalArgumentException("Bad byte array");
         }
-        return new String(bytes, charset);
+        return (T) new String(bytes, charset);
     }
 
     /**

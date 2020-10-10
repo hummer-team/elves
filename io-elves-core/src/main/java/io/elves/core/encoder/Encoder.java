@@ -1,5 +1,5 @@
 /*
- * Copyright 1999-2018 Alibaba Group Holding Ltd.
+ * Copyright 1999-2020 panli Group Holding Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.nio.charset.Charset;
  * @param <R> source type
  * @author Eric Zhao
  */
-public interface Encoder<R> {
+public interface Encoder {
 
     /**
      * Check whether the encoder supports the given source type.
@@ -40,16 +40,15 @@ public interface Encoder<R> {
      * @param charset the charset
      * @return the encoded byte buffer
      */
-    byte[] encode(R r, Charset charset);
+    <R> byte[] encode(R r, Charset charset);
 
     /**
      * Encode the given object into a byte array with the default charset.
      *
      * @param r the object to encode
      * @return the encoded byte buffer, witch is already flipped.
-
      */
-    byte[] encode(R r);
+    <R> byte[] encode(R r);
 
     /**
      * encode name . ig: application/json or text/plain

@@ -1,5 +1,9 @@
 package io.elves.core.response;
 
+import org.slf4j.MDC;
+
+import static io.elves.core.ElvesConstants.REQUEST_ID_KEY;
+
 /**
  * Command response representation of command center.
  *
@@ -10,8 +14,9 @@ public class CommandResponse<R> {
 
     private final int code;
     private final R data;
-    private final Throwable exception;
+    private final transient Throwable exception;
     private String message;
+    private String trackId;
 
     private CommandResponse(R data) {
         this(data, 0, null);
@@ -73,5 +78,9 @@ public class CommandResponse<R> {
 
     public String getExceptionMessage() {
         return exception == null ? null : exception.getMessage();
+    }
+
+    public String getTrackId() {
+        return MDC.get(REQUEST_ID_KEY);
     }
 }

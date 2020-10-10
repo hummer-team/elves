@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 panli Group Holding Ltd.
+ * Copyright 1999-2020 panli Group Holding Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ package io.elves.core.encoder;
  */
 final class DefaultCodecs {
 
-    public static final Encoder<String> STRING_ENCODER = new StringEncoder();
-    public static final Decoder<String> STRING_DECODER = new StringDecoder();
-    public static final Encoder<Object> JSON_ENCODER = new JsonEncoder();
-    public static final Decoder<Object> JSON_DECODER = new JsonDecoder();
+    public static final Encoder STRING_ENCODER = new StringEncoder();
+    public static final Decoder STRING_DECODER = new StringDecoder();
+    public static final Encoder JSON_ENCODER = new JsonEncoder();
+    public static final Decoder JSON_DECODER = new JsonDecoder();
 
     private DefaultCodecs() {
     }

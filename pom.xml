@@ -17,6 +17,7 @@
         <guava.version>29.0-jre</guava.version>
         <lombok.version>1.18.8</lombok.version>
         <fastjson.version>1.2.71</fastjson.version>
+        <commons-io.version>2.6</commons-io.version>
     </properties>
     <modules>
         <module>io-elves-http</module>
@@ -96,6 +97,11 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

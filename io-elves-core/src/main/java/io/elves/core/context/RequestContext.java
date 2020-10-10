@@ -1,5 +1,6 @@
 package io.elves.core.context;
 
+import io.elves.core.encoder.Decoder;
 import io.netty.handler.codec.http.HttpHeaders;
 import org.apache.commons.lang3.StringUtils;
 
@@ -17,23 +18,45 @@ public class RequestContext {
     private final Map<String, String> metadata = new HashMap<String, String>();
     private final Map<String, String> parameters = new HashMap<String, String>();
     private HttpHeaders headers;
+    private String contentType;
     private byte[] body;
+    private Decoder decoder;
 
-    public byte[] getBody() {
-        return body;
+    public static RequestContext build() {
+        return new RequestContext();
     }
 
-    public RequestContext setBody(byte[] body) {
-        this.body = body;
+    public <T> T body(Class<?> clazz) {
+        if (decoder == null) {
+            throw new IllegalArgumentException("decoder not found");
+        }
+        return decoder.decode(getBodyByte(), clazz);
+    }
+
+    public Decoder getDecoder() {
+        return decoder;
+    }
+
+    public RequestContext decoder(Decoder decoder) {
+        this.decoder = decoder;
         return this;
     }
 
-    public HttpHeaders getHeaders() {
-        return headers;
+    public String getContentType() {
+        return contentType;
     }
 
-    public RequestContext addHeaders(HttpHeaders headers) {
-        this.headers = headers;
+    public RequestContext contentType(String contentType) {
+        this.contentType = contentType;
+        return this;
+    }
+
+    public byte[] getBodyByte() {
+        return body;
+    }
+
+    public RequestContext body(byte[] body) {
+        this.body = body;
         return this;
     }
 
@@ -50,7 +73,24 @@ public class RequestContext {
         return StringUtils.isBlank(value) ? defaultValue : value;
     }
 
-    public RequestContext addParam(String key, String value) {
+    public Map<String, String> getMetadata() {
+        return metadata;
+    }
+
+    public String getCommandName() {
+        return getMetadata().get(COMMAND_TARGET);
+    }
+
+    public HttpHeaders getHeaders() {
+        return headers;
+    }
+
+    public RequestContext headers(HttpHeaders headers) {
+        this.headers = headers;
+        return this;
+    }
+
+    public RequestContext param(String key, String value) {
         if (StringUtils.isBlank(key)) {
             throw new IllegalArgumentException("Parameter key cannot be empty");
         }
@@ -58,11 +98,15 @@ public class RequestContext {
         return this;
     }
 
-    public Map<String, String> getMetadata() {
-        return metadata;
+    public RequestContext param(Map<String, String> paramMap) {
+        if (paramMap == null) {
+            return this;
+        }
+        parameters.putAll(paramMap);
+        return this;
     }
 
-    public RequestContext addMetadata(String key, String value) {
+    public RequestContext metadata(String key, String value) {
         if (StringUtils.isBlank(key)) {
             throw new IllegalArgumentException("Metadata key cannot be empty");
         }
@@ -70,8 +114,9 @@ public class RequestContext {
         return this;
     }
 
-    public String getCommandName() {
-        return getMetadata().get(COMMAND_TARGET);
+    public RequestContext builder() {
+        //todo check
+        return this;
     }
 
     public void clean() {

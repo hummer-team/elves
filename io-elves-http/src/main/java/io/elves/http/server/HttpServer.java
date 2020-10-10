@@ -40,8 +40,8 @@ public class HttpServer implements ElvesServer {
                     .childHandler(new HttpServerInitializer());
 
             ChannelFuture channelFuture = b.bind(ElvesProperty.getPort()).sync();
-            log.info("elves http server start ok , port: {}", ElvesProperty.getPort());
             channel = channelFuture.channel();
+            log.info("elves http server start ok , port: {}", ElvesProperty.getPort());
             channel.closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();

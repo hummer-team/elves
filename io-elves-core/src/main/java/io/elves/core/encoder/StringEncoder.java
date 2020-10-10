@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 panli Group Holding Ltd.
+ * Copyright 1999-2020 panli Group Holding Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package io.elves.core.encoder;
 
+import com.alibaba.fastjson.JSON;
+
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -23,7 +25,7 @@ import java.nio.charset.StandardCharsets;
  *
  * @author lee
  */
-public class StringEncoder implements Encoder<String> {
+public class StringEncoder implements Encoder {
 
     @Override
     public boolean canEncode(Class<?> clazz) {
@@ -32,13 +34,13 @@ public class StringEncoder implements Encoder<String> {
 
 
     @Override
-    public byte[] encode(String string, Charset charset) {
-        return string.getBytes(charset);
+    public <R> byte[] encode(R r, Charset charset) {
+        return JSON.toJSONBytes(r);
     }
 
     @Override
-    public byte[] encode(String s) {
-        return encode(s, StandardCharsets.UTF_8);
+    public <R> byte[] encode(R r) {
+        return encode(r, StandardCharsets.UTF_8);
     }
 
     /**

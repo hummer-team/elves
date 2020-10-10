@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSON;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-public class JsonDecoder implements Decoder<Object> {
+public class JsonDecoder implements Decoder {
     /**
      * Check whether the decoder supports the given target type.
      *
@@ -24,8 +24,8 @@ public class JsonDecoder implements Decoder<Object> {
      * @return the decoded target object
      */
     @Override
-    public Object decode(byte[] bytes){
-        return decode(bytes, StandardCharsets.UTF_8);
+    public <T> T decode(byte[] bytes, Class<?> target) {
+        return decode(bytes, target, StandardCharsets.UTF_8);
     }
 
     /**
@@ -36,8 +36,8 @@ public class JsonDecoder implements Decoder<Object> {
      * @return the decoded target object
      */
     @Override
-    public Object decode(byte[] bytes, Charset charset) {
-        return JSON.parse(bytes);
+    public <T> T decode(byte[] bytes, Class<?> target, Charset charset) {
+        return JSON.parseObject(bytes, target);
     }
 
     /**
