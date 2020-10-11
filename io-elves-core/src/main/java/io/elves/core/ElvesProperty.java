@@ -24,6 +24,10 @@ public class ElvesProperty {
         return DEFAULT_PORT;
     }
 
+    public static int getSslPort() {
+        return DEFAULT_PORT + 1;
+    }
+
     public String getCharset() {
         return charset;
     }

@@ -1,6 +1,7 @@
 package io.elves.simple.http.server;
 
 import io.elves.core.ElvesBootStart;
+import io.elves.http.server.Http2Server;
 import io.elves.http.server.HttpServer;
 
 /**
@@ -8,6 +9,6 @@ import io.elves.http.server.HttpServer;
  */
 public class ApplicationStart {
     public static void main(String[] args) {
-        ElvesBootStart.run(HttpServer.class, args);
+        ElvesBootStart.run(Http2Server.class, args);
     }
 }

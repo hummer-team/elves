@@ -2,24 +2,25 @@ package io.elves.http.server;
 
 import io.elves.core.ElvesProperty;
 import io.elves.core.ElvesServer;
-import io.elves.core.coder.CodecContainer;
 import io.elves.core.command.CommandHandlerContainer;
-import io.elves.http.server.init.HttpServerInitializer;
+import io.elves.http.server.init.Http2ServerInitializer;
+import io.elves.http.server.ssl.SslBuilder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.ssl.SslContext;
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
-public class HttpServer implements ElvesServer {
+import javax.net.ssl.SSLException;
+import java.security.cert.CertificateException;
 
+@Slf4j
+public class Http2Server implements ElvesServer {
     private Channel channel;
 
     @Override
@@ -28,28 +29,20 @@ public class HttpServer implements ElvesServer {
     }
 
     @Override
-    public void start(String[] args) throws InterruptedException {
+    public void start(String[] args) throws InterruptedException, CertificateException, SSLException {
         EventLoopGroup bossGroup = new NioEventLoopGroup(ElvesProperty.getIoThread());
         EventLoopGroup workerGroup = new NioEventLoopGroup(ElvesProperty.getWorkThread());
 
+        final SslContext sslCtx = SslBuilder.configureTLS();
         try {
             ServerBootstrap b = new ServerBootstrap();
+            b.option(ChannelOption.SO_BACKLOG, 1024);
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
-                    .childOption(ChannelOption.TCP_NODELAY, true)
-                    .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .handler(new LoggingHandler(LogLevel.DEBUG))
-                    .childHandler(new HttpServerInitializer());
-
-            ChannelFuture channelFuture = b.bind(ElvesProperty.getPort()).sync();
-            channel = channelFuture.channel();
-            channelFuture.addListener((ChannelFutureListener) future -> {
-                if (!future.isSuccess()) {
-                    log.error("channel bind failed ", future.cause());
-                }
-            });
-            log.info("elves http server start ok , port: {}", ElvesProperty.getPort());
-            channel.closeFuture().sync();
+                    .childHandler(new Http2ServerInitializer(sslCtx));
+            Channel ch = b.bind(ElvesProperty.getSslPort()).sync().channel();
+            ch.closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
@@ -59,7 +52,5 @@ public class HttpServer implements ElvesServer {
     @Override
     public void close() {
         channel.close();
-        CodecContainer.clear();
-        log.info("elves http server channel closed.");
     }
 }
