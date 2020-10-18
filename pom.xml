@@ -19,6 +19,17 @@
         <fastjson.version>1.2.71</fastjson.version>
         <commons-io.version>2.6</commons-io.version>
         <protostuff.version>1.7.2</protostuff.version>
+        <npn-api.version>1.1.1.v20141010</npn-api.version>
+        <alpn-api.version>1.1.2.v20150522</alpn-api.version>
+        <netty-tcnative.version>2.0.34.Final</netty-tcnative.version>
+        <conscrypt-openjdk-uber.version>2.4.0</conscrypt-openjdk-uber.version>
+        <conscrypt.classifier />
+        <os.detected.classifier>osx-x86_64</os.detected.classifier>
+<!--        <os.detected.classifier/>-->
+        <tcnative.classifier>${os.detected.classifier}</tcnative.classifier>
+        <netty.build.version>26</netty.build.version>
+        <bcprov-jdk15on.version>1.54</bcprov-jdk15on.version>
+        <bcpkix-jdk15on.version>1.65</bcpkix-jdk15on.version>
     </properties>
     <modules>
         <module>io-elves-http</module>
@@ -31,6 +42,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.elves</groupId>
+                <artifactId>io-elves-all</artifactId>
+                <version>${io.elves.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.elves</groupId>
                 <artifactId>io-elves-core</artifactId>
@@ -114,6 +130,75 @@
                 <groupId>io.protostuff</groupId>
                 <artifactId>protostuff-runtime</artifactId>
                 <version>${protostuff.version}</version>
+            </dependency>
+            <!-- SPDY and HTTP/2 - completely optional -->
+            <dependency>
+                <groupId>org.eclipse.jetty.npn</groupId>
+                <artifactId>npn-api</artifactId>
+                <version>${npn-api.version}</version>
+                <scope>provided</scope> <!-- Provided by npn-boot -->
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty.alpn</groupId>
+                <artifactId>alpn-api</artifactId>
+                <version>${alpn-api.version}</version>
+                <scope>provided</scope> <!-- Provided by alpn-boot -->
+            </dependency>
+
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec-http2</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-handler</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-handler-proxy</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-tcnative</artifactId>
+                <version>${netty-tcnative.version}</version>
+                <classifier>${tcnative.classifier}</classifier>
+                <scope>compile</scope>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>org.conscrypt</groupId>
+                <artifactId>conscrypt-openjdk-uber</artifactId>
+                <version>${conscrypt-openjdk-uber.version}</version>
+                <classifier>${conscrypt.classifier}</classifier>
+                <scope>compile</scope>
+                <optional>true</optional>
+            </dependency>
+            <!--
+       Bouncy Castle - completely optional, only needed when:
+       - you generate a temporary self-signed certificate using SelfSignedCertificate, and
+       - you don't use the JDK which doesn't provide sun.security.x509 package.
+     -->
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk15on</artifactId>
+                <version>${bcpkix-jdk15on.version}</version>
+                <scope>compile</scope>
+                <optional>true</optional>
+            </dependency>
+
+            <!--
+              Completely optional and only needed for OCSP stapling to construct and
+              parse OCSP requests and responses.
+            -->
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk15on</artifactId>
+                <version>${bcprov-jdk15on.version}</version>
+                <scope>compile</scope>
+                <optional>true</optional>
             </dependency>
         </dependencies>
     </dependencyManagement>

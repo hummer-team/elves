@@ -20,6 +20,10 @@ public @interface CommandMapping {
      * command desc
      */
     String desc = "";
+    /**
+     * if <code>true</code> then run at thread pool ,else run at main thread.
+     */
+    boolean async = false;
 
     /**
      * command name

@@ -7,10 +7,19 @@ import static io.elves.core.ElvesConstants.DEFAULT_PORT;
  *
  * @author lee
  */
-public class ElvesProperty {
+public class ElvesProperties {
     private int ioThread;
     private int workThread;
     private String charset;
+    private boolean h2;
+
+    public static int maxRequestContentSize() {
+        return 10 * 1024 * 1024;
+    }
+
+    public static boolean enableH2() {
+        return false;
+    }
 
     public static int getIoThread() {
         return Runtime.getRuntime().availableProcessors();

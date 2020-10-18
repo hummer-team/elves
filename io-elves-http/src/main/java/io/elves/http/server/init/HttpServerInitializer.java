@@ -1,26 +1,31 @@
 package io.elves.http.server.init;
 
-import io.elves.http.server.handler.http1.DispatchCommandHandler;
+import io.elves.core.ElvesProperties;
+import io.elves.http.server.handler.Http2OrHttpConfigure;
+import io.elves.http.server.ssl.SslBuilder;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
-import io.netty.handler.stream.ChunkedWriteHandler;
+
+import javax.net.ssl.SSLException;
+import java.security.cert.CertificateException;
 
 /**
  * @author lee
  */
 public class HttpServerInitializer extends ChannelInitializer<SocketChannel> {
 
+    public HttpServerInitializer() {
+
+    }
+
     @Override
-    protected void initChannel(SocketChannel socketChannel) {
+    protected void initChannel(SocketChannel socketChannel)
+            throws CertificateException, SSLException {
         ChannelPipeline p = socketChannel.pipeline();
-        p.addLast(new HttpRequestDecoder());
-        p.addLast(new HttpObjectAggregator(1024 * 1024 * 3));
-        p.addLast(new HttpResponseEncoder());
-        p.addLast(new ChunkedWriteHandler());
-        p.addLast(new DispatchCommandHandler());
+        if (ElvesProperties.enableH2()) {
+            p.addLast(SslBuilder.configureTLSIfEnable().newHandler(socketChannel.alloc()));
+        }
+        p.addLast(new Http2OrHttpConfigure());
     }
 }

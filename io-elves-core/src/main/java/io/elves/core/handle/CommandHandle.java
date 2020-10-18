@@ -4,5 +4,5 @@ import io.elves.core.context.RequestContext;
 import io.elves.core.response.CommandResponse;
 
 public interface CommandHandle<R> {
-    CommandResponse<R> handle(RequestContext request);
+    CommandResponse<R> handle(RequestContext context);
 }

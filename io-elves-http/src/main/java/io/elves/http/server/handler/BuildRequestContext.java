@@ -1,4 +1,4 @@
-package io.elves.http.server.handler.http1;
+package io.elves.http.server.handler;
 
 import io.elves.core.context.RequestContext;
 import io.elves.core.coder.CodecContainer;

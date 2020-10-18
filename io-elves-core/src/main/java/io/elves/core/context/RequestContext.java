@@ -1,5 +1,6 @@
 package io.elves.core.context;
 
+import com.google.common.base.Strings;
 import io.elves.core.coder.Coder;
 import io.netty.handler.codec.http.HttpHeaders;
 import org.apache.commons.lang3.StringUtils;
@@ -43,8 +44,9 @@ public class RequestContext {
         return this;
     }
 
-    public String getContentType() {
-        return contentType;
+    public String getContentType(boolean ifNullUseDefault) {
+        return Strings.isNullOrEmpty(contentType) && ifNullUseDefault ?
+                "application/json" : null;
     }
 
     public RequestContext contentType(String contentType) {

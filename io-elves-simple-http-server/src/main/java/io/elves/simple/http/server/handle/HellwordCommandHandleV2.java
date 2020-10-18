@@ -13,9 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 @CommandMapping(name = "/hell", httpMethod = HttpMethod.POST)
 public class HellwordCommandHandleV2 implements CommandHandle<HellwordResp> {
     @Override
-    public CommandResponse<HellwordResp> handle(RequestContext request) {
+    public CommandResponse<HellwordResp> handle(RequestContext context) {
         HellwordResp resp = new HellwordResp();
-        resp.setName("hi:" + ((HellwordReq) request.body(HellwordReq.class)).getName());
+        resp.setName("hi:" + ((HellwordReq) context.body(HellwordReq.class)).getName());
         return CommandResponse.ofSuccess(resp);
     }
 }
