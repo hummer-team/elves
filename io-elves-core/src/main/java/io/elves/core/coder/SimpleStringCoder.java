@@ -1,11 +1,15 @@
 package io.elves.core.coder;
 
 import com.alibaba.fastjson.JSON;
+import io.elves.core.response.CommandResponse;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 public class SimpleStringCoder implements Coder {
-    public static final Coder INSTANCE =new SimpleStringCoder();
+    public static final Coder INSTANCE = new SimpleStringCoder();
+
     /**
      * Check if it can be encoded
      *
@@ -37,7 +41,15 @@ public class SimpleStringCoder implements Coder {
      */
     @Override
     public <T> byte[] encode(T t, Charset charset) {
-        return JSON.toJSONBytes(t);
+        if (t instanceof CommandResponse) {
+            Object o = ((CommandResponse) t).getData();
+            if (o == null) {
+                return "{}".getBytes();
+            }
+            return Objects.toString(o).getBytes(charset);
+        } else {
+            return JSON.toJSONBytes(t);
+        }
     }
 
     /**

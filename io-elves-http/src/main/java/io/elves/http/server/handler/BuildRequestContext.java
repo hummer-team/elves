@@ -45,7 +45,7 @@ public class BuildRequestContext {
         if (StringUtils.isEmpty(uri)) {
             return String.format("-%s", method);
         }
-        return String.format("%s-%s", uri, method);
+        return String.format("%s-%s", method,uri);
     }
 
     private static byte[] parseBodyByte(FullHttpRequest request) {

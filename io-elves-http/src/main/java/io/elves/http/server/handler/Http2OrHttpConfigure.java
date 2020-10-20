@@ -36,7 +36,7 @@ public class Http2OrHttpConfigure extends ApplicationProtocolNegotiationHandler 
                 .connection(connection)
                 .build());
 
-        ctx.pipeline().addLast(new ChunkedWriteHandler()).addLast(new H2Handler());
+        ctx.pipeline().addLast(new H2Handler());
         log.debug("http2 configuration done.");
     }
 

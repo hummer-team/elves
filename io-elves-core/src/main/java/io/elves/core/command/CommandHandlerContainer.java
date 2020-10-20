@@ -61,7 +61,7 @@ public class CommandHandlerContainer {
     private String parseCommandName(CommandHandle handler) {
         CommandMapping commandMapping = handler.getClass().getAnnotation(CommandMapping.class);
         if (commandMapping != null) {
-            return String.format("%s-%s", commandMapping.name(), commandMapping.httpMethod());
+            return String.format("%s-%s", commandMapping.httpMethod(), commandMapping.name());
         } else {
             return null;
         }

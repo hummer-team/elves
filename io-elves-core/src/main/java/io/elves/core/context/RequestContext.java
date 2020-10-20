@@ -46,7 +46,7 @@ public class RequestContext {
 
     public String getContentType(boolean ifNullUseDefault) {
         return Strings.isNullOrEmpty(contentType) && ifNullUseDefault ?
-                "application/json" : null;
+                "text/plain" : contentType;
     }
 
     public RequestContext contentType(String contentType) {

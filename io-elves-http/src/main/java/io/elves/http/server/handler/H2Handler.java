@@ -76,6 +76,7 @@ public class H2Handler extends SimpleChannelInboundHandler<FullHttpRequest> {
             FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK, content);
             response.headers().add(respContext.getHeaders());
             writeResponse(ctx, streamId, response, HttpUtil.isKeepAlive(request));
+
         } catch (Throwable ex) {
             HttpResponseStatus status = INTERNAL_SERVER_ERROR;
             if (ex instanceof CommandException) {

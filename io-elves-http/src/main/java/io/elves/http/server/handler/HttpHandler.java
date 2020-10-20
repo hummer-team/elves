@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import static io.elves.core.ElvesConstants.FAVICON_PATH;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
+import static io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 
 /**
@@ -43,7 +44,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         ctx.close();
-        log.error("dispatch http command exception ", cause);
+        log.error("dispatch http command exception,close this channel. this cause is: ", cause);
     }
 
     @Override
@@ -55,7 +56,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) {
         //ignore request favicon.ico
         if (FAVICON_PATH.equals(request.uri())) {
-            ctx.write(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, BAD_REQUEST));
+            ctx.writeAndFlush(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, NOT_FOUND));
             return;
         }
 

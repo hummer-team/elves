@@ -12,9 +12,15 @@ public class ElvesProperties {
     private int workThread;
     private String charset;
     private boolean h2;
+    private int idleTimeOutSecond;
+    private long bufferSize;
 
     public static int maxRequestContentSize() {
         return 10 * 1024 * 1024;
+    }
+
+    public static int getIdleTimeOutSecond(){
+        return 45;
     }
 
     public static boolean enableH2() {
@@ -22,7 +28,7 @@ public class ElvesProperties {
     }
 
     public static int getIoThread() {
-        return Runtime.getRuntime().availableProcessors();
+        return 1;
     }
 
     public static int getWorkThread() {

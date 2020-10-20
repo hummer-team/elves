@@ -98,7 +98,11 @@ public class DispatchCommandHandler {
     private byte[] innerHandler(RequestContext context
             , CommandHandle<?> commandHandler) {
 
+        long start = System.currentTimeMillis();
         CommandResponse<?> resp = commandHandler.handle(context);
+        log.debug("dispatch command done cost {} millis,command name {}"
+                , System.currentTimeMillis() - start
+                , context.getCommandName());
         return encodeResponseBody(resp, context.getContentType(true));
     }
 }
