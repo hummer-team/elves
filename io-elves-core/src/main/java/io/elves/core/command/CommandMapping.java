@@ -19,19 +19,20 @@ public @interface CommandMapping {
     /**
      * command desc
      */
-    String desc = "";
+    String desc() default "";
+
     /**
      * if <code>true</code> then run at thread pool ,else run at main thread.
      */
-    boolean async = false;
+    boolean async() default false;
+
+    /**
+     * get,post,put
+     */
+    HttpMethod httpMethod() default HttpMethod.GET;
 
     /**
      * command name
      */
     String name();
-
-    /**
-     * get,post,put
-     */
-    HttpMethod httpMethod();
 }

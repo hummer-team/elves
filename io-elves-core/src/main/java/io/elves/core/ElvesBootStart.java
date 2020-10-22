@@ -14,14 +14,19 @@ public class ElvesBootStart {
 
     public static void run(Class<?> classz, String[] args) {
         checkIsElvesServer(classz);
+        ElvesServer server = null;
         try {
-            ElvesServer server = (ElvesServer) classz.newInstance();
+            server = (ElvesServer) classz.newInstance();
             Runtime.getRuntime().addShutdownHook(new Thread(server::close));
             server.init();
             server.start(args);
         } catch (Throwable e) {
             log.error("ElvesServer start failed", e);
             System.exit(1);
+        } finally {
+            if (server != null) {
+                server.close();
+            }
         }
     }
 

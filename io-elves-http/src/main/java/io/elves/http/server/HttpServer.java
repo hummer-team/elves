@@ -1,8 +1,9 @@
 package io.elves.http.server;
 
-import io.elves.core.ElvesProperties;
+import io.elves.core.ElvesConstants;
 import io.elves.core.ElvesServer;
 import io.elves.core.command.CommandHandlerContainer;
+import io.elves.core.properties.ElvesProperties;
 import io.elves.http.server.handler.HeartBeatServerHandler;
 import io.elves.http.server.handler.Http2OrHttpConfigure;
 import io.elves.http.server.handler.HttpHandler;
@@ -26,6 +27,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLException;
+import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +39,8 @@ public class HttpServer implements ElvesServer {
     private Channel channel;
 
     @Override
-    public void init() {
+    public void init() throws IOException {
+        ElvesProperties.load(System.getProperty(ElvesConstants.PROFILES_ACTIVE));
         CommandHandlerContainer.getInstance().registerHandle();
     }
 
@@ -62,8 +65,8 @@ public class HttpServer implements ElvesServer {
                                 ch.pipeline()
                                         .addLast(sslContext.newHandler(ch.alloc()), new Http2OrHttpConfigure())
                                         .addFirst(new IdleStateHandler(
-                                                ElvesProperties.getIdleTimeOutSecond()
-                                                , 0
+                                                ElvesProperties.getIdleReadTimeOutSecond()
+                                                , ElvesProperties.getIdleWriteTimeoutSecond()
                                                 , 0
                                                 , TimeUnit.SECONDS))
                                         .addLast(new HeartBeatServerHandler());
@@ -76,8 +79,8 @@ public class HttpServer implements ElvesServer {
                                         .addLast(new ChunkedWriteHandler())
                                         .addLast(new HttpHandler())
                                         .addFirst(new IdleStateHandler(
-                                                ElvesProperties.getIdleTimeOutSecond()
-                                                , 0
+                                                ElvesProperties.getIdleReadTimeOutSecond()
+                                                , ElvesProperties.getIdleWriteTimeoutSecond()
                                                 , 0
                                                 , TimeUnit.SECONDS))
                                         .addLast(new HeartBeatServerHandler());
@@ -97,6 +100,8 @@ public class HttpServer implements ElvesServer {
 
     @Override
     public void close() {
-        channel.close();
+        if (channel != null) {
+            channel.close();
+        }
     }
 }

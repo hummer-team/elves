@@ -10,6 +10,7 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <netty.version>4.1.52.Final</netty.version>
         <slf4j-api.version>1.7.30</slf4j-api.version>
         <io.elves.version>1.0-SNAPSHOT</io.elves.version>
@@ -25,11 +26,15 @@
         <conscrypt-openjdk-uber.version>2.4.0</conscrypt-openjdk-uber.version>
         <conscrypt.classifier />
         <os.detected.classifier>osx-x86_64</os.detected.classifier>
-<!--        <os.detected.classifier/>-->
+        <!--<os.detected.classifier/>-->
         <tcnative.classifier>${os.detected.classifier}</tcnative.classifier>
         <netty.build.version>26</netty.build.version>
         <bcprov-jdk15on.version>1.54</bcprov-jdk15on.version>
         <bcpkix-jdk15on.version>1.65</bcpkix-jdk15on.version>
+        <maven.jar.version>3.1.0</maven.jar.version>
+        <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
+        <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     </properties>
     <modules>
         <module>io-elves-http</module>
@@ -39,6 +44,31 @@
         <module>io-elves-all</module>
     </modules>
 
+    <distributionManagement>
+        <repository>
+            <id>maven-releases</id>
+            <url>http://10.10.10.250:8081/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <url>http://10.10.10.250:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+    <repositories>
+        <repository>
+            <id>ygfmaven</id>
+            <name>maven-public</name>
+            <url>http://10.10.10.250:8081/repository/maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <dependencyManagement>
         <dependencies>
@@ -202,4 +232,30 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven.jar.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${maven-resources-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>${maven-shade-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

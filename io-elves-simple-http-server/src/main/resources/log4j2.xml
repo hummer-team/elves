@@ -86,15 +86,8 @@
 	</appenders>
 	<loggers>
 		<!-- 3rdparty Loggers -->
-		<Logger name="org.springframework" level="error" />
 		<Logger name="com.google" level="error" />
-		<Logger name="net.rubyeye" level="error" />
-		<Logger name="org.hibernate" level="error" />
-		<Logger name="com.alibaba.dubbo" level="error" />
-		<Logger name="org.mybatis" level="debug" />
-		<Logger name="org.apache" level="error" />
-		<Logger name="io.undertow" level="info"/>
-		<Logger name="springfox.documentation" level="error" />
+		<Logger name="com.alibaba.fastjson" level="error" />
 		<Root level="debug">
 			<appender-ref ref="Console" />
 			<appender-ref ref="LogstashFile" />

@@ -1,6 +1,6 @@
 package io.elves.http.server.handler;
 
-import io.elves.core.ElvesProperties;
+import io.elves.core.properties.ElvesProperties;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.HttpObjectAggregator;

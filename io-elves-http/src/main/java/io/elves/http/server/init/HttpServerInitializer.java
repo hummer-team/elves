@@ -1,6 +1,6 @@
 package io.elves.http.server.init;
 
-import io.elves.core.ElvesProperties;
+import io.elves.core.properties.ElvesProperties;
 import io.elves.http.server.handler.Http2OrHttpConfigure;
 import io.elves.http.server.ssl.SslBuilder;
 import io.netty.channel.ChannelInitializer;

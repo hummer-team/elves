@@ -1,0 +1,2 @@
+io.elves.http.server.health.ElvesHealthCommandHandler$Warmup
+io.elves.http.server.health.ElvesHealthCommandHandler$UpTime

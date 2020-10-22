@@ -1,6 +1,6 @@
 package io.elves.http.server.ssl;
 
-import io.elves.core.ElvesProperties;
+import io.elves.core.properties.ElvesProperties;
 import io.netty.handler.ssl.ApplicationProtocolConfig;
 import io.netty.handler.ssl.ApplicationProtocolNames;
 import io.netty.handler.ssl.SslContext;
