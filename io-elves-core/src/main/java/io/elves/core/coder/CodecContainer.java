@@ -43,7 +43,7 @@ public final class CodecContainer {
 
     public static Coder getCoder(String coderName) {
         String name = Strings.isNullOrEmpty(coderName) ? "text/plain" : coderName;
-        return CODER_MAP.get(name);
+        return CODER_MAP.getOrDefault(name, SimpleStringCoder.INSTANCE);
     }
 
     public static void clear() {

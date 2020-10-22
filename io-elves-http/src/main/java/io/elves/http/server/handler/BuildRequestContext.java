@@ -1,8 +1,11 @@
 package io.elves.http.server.handler;
 
-import io.elves.core.context.RequestContext;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import io.elves.core.coder.CodecContainer;
+import io.elves.core.context.RequestContext;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http.multipart.HttpData;
@@ -31,8 +34,9 @@ public class BuildRequestContext {
         return RequestContext
                 .build()
                 .headers(request.headers())
-                .contentType(request.headers().get("Content-Type"))
-                .decoder(CodecContainer.getCoder(request.headers().get("Content-Type")))
+                .requestContentType(getContentType(request.headers()))
+                .decoder(CodecContainer.getCoder(getContentType(request.headers())))
+                .responseContentType(getContentType(request.headers()))
                 .param(parseQueryParam(queryStringDecoder))
                 .param(parsePostParam(request))
                 .body(parseBodyByte(request))
@@ -41,11 +45,16 @@ public class BuildRequestContext {
 
     }
 
+    private static String getContentType(HttpHeaders headers) {
+        String contentType = headers.get("Content-Type");
+        return Iterables.get(Splitter.on(";").split(contentType), 0);
+    }
+
     private static String parseTarget(String uri, HttpMethod method) {
         if (StringUtils.isEmpty(uri)) {
             return String.format("-%s", method);
         }
-        return String.format("%s-%s", method,uri);
+        return String.format("%s-%s", method, uri);
     }
 
     private static byte[] parseBodyByte(FullHttpRequest request) {

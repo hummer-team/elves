@@ -42,7 +42,6 @@ public class CommandHandlerContainer {
             log.warn("[NettyHttpCommandCenter] Register failed (duplicate command): {}", commandName);
             return;
         }
-
         HANDLER_MAP.put(commandName, handler);
         log.debug("[{} -> {}] command handle register done.", commandName, handler.getClass().getName());
     }

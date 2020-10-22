@@ -7,7 +7,7 @@ import io.elves.core.request.HttpMethod;
 import io.elves.core.response.CommandResponse;
 
 @CommandMapping(name = "/hell", httpMethod = HttpMethod.GET)
-public class HellwordCommandHandle implements CommandHandle<String> {
+public class HellwordCommandHandler implements CommandHandle<String> {
     @Override
     public CommandResponse<String> handle(RequestContext context) {
         return CommandResponse.ofSuccess("hellword");

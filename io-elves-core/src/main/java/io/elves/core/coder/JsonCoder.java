@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 
 import java.nio.charset.Charset;
 
+import static io.elves.core.ElvesConstants.JSON_CODER;
+
 public class JsonCoder implements Coder {
     public static final Coder INSTANCE = new JsonCoder();
     /**
@@ -38,6 +40,6 @@ public class JsonCoder implements Coder {
      */
     @Override
     public String codeName() {
-        return "application/json";
+        return JSON_CODER;
     }
 }

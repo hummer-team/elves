@@ -4,8 +4,10 @@ import com.alibaba.fastjson.JSON;
 import io.elves.core.response.CommandResponse;
 
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.Objects;
+
+import static io.elves.core.ElvesConstants.TEXT_PLAIN_CODER;
 
 public class SimpleStringCoder implements Coder {
     public static final Coder INSTANCE = new SimpleStringCoder();
@@ -29,7 +31,7 @@ public class SimpleStringCoder implements Coder {
      */
     @Override
     public boolean canEncode(Class<?> clazz) {
-        return String.class.isAssignableFrom(clazz);
+        return String.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz);
     }
 
     /**
@@ -75,6 +77,6 @@ public class SimpleStringCoder implements Coder {
      */
     @Override
     public String codeName() {
-        return "text/plain";
+        return TEXT_PLAIN_CODER;
     }
 }

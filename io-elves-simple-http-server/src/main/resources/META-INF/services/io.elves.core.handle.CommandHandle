@@ -1,2 +1,3 @@
-io.elves.simple.http.server.handle.HellwordCommandHandle
-io.elves.simple.http.server.handle.HellwordCommandHandleV2
+io.elves.simple.http.server.handle.HellwordCommandHandler
+io.elves.simple.http.server.handle.HellwordCommandHandlerV2
+io.elves.simple.http.server.handle.HellwordCommandHandlerV3

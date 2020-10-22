@@ -26,6 +26,9 @@ import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERR
 import static io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND;
 import static io.netty.handler.codec.http.HttpResponseStatus.NOT_IMPLEMENTED;
 
+/**
+ * @author lee
+ */
 @Slf4j
 public class DispatchCommandHandler {
     public static final DispatchCommandHandler INSTANCE = new DispatchCommandHandler();
@@ -36,20 +39,27 @@ public class DispatchCommandHandler {
 
     public ResponseConext handler(final FullHttpRequest request) {
         setRequestId(request);
-        RequestContext context = BuildRequestContext.parseRequest(request);
+        RequestContext requestContext = BuildRequestContext.parseRequest(request);
 
-        if (StringUtils.isBlank(context.getCommandName())) {
+        if (StringUtils.isBlank(requestContext.getCommandName())) {
             throw new CommandException(BAD_REQUEST, "Invalid command name.");
         }
 
-        CommandHandle<?> commandHandler = CommandHandlerContainer.getInstance().getHandle(context.getCommandName());
+        CommandHandle<?> commandHandler = CommandHandlerContainer
+                .getInstance()
+                .getHandle(requestContext.getCommandName());
         if (commandHandler == null) {
-            throw new CommandException(NOT_FOUND, String.format("not found -> \"%s\"", context.getCommandName()));
+            throw new CommandException(NOT_FOUND, String.format("not found -> \"%s\""
+                    , requestContext.getCommandName()));
         }
 
-        return new ResponseConext(innerHandler(context, commandHandler)
+        ResponseConext responseConext = new ResponseConext(innerHandler(requestContext, commandHandler)
                 , new DefaultHttpHeaders().add("Content-Type", String.format("%s; charset=UTF-8"
-                , context.getContentType(true))));
+                , requestContext.getResponseContentType())));
+
+        requestContext.clean();
+
+        return responseConext;
     }
 
 
@@ -68,7 +78,8 @@ public class DispatchCommandHandler {
         Coder encoder = CodecContainer.getCoder(requestContextType);
         if (encoder == null) {
             log.error("command handle encoder {} not support", requestContextType);
-            throw new CommandException(NOT_IMPLEMENTED, "server encoder not implement");
+            throw new CommandException(NOT_IMPLEMENTED, String.format("server encoder not implement -> %s"
+                    , requestContextType));
         }
 
         if (encoder.canEncode(clazz)) {
@@ -103,6 +114,6 @@ public class DispatchCommandHandler {
         log.debug("command execute done, cost {} ms -> {}"
                 , System.currentTimeMillis() - start
                 , context.getCommandName());
-        return encodeResponseBody(resp, context.getContentType(true));
+        return encodeResponseBody(resp, context.getRequestContentType(true));
     }
 }

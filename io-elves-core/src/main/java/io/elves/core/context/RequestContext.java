@@ -9,6 +9,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import static io.elves.core.ElvesConstants.FORM_DATA_CODER;
+import static io.elves.core.ElvesConstants.TEXT_PLAIN_CODER;
+import static io.elves.core.ElvesConstants.X_WWW_FORM_URLENCODED;
+
 /**
  * Command request representation of command center.
  *
@@ -20,7 +24,8 @@ public class RequestContext {
     private final Map<String, String> metadata = new HashMap<String, String>();
     private final Map<String, String> parameters = new HashMap<String, String>();
     private HttpHeaders headers;
-    private String contentType;
+    private String requestContentType;
+    private String responseContentType;
     private byte[] body;
     private Coder decoder;
 
@@ -44,13 +49,31 @@ public class RequestContext {
         return this;
     }
 
-    public String getContentType(boolean ifNullUseDefault) {
-        return Strings.isNullOrEmpty(contentType) && ifNullUseDefault ?
-                "text/plain" : contentType;
+    public String getResponseContentType() {
+        return responseContentType;
     }
 
-    public RequestContext contentType(String contentType) {
-        this.contentType = contentType;
+    public RequestContext responseContentType(String requestContentType) {
+        if (FORM_DATA_CODER.equals(requestContentType)) {
+            this.responseContentType  = TEXT_PLAIN_CODER;
+            return this;
+        }
+
+        if (X_WWW_FORM_URLENCODED.equals(requestContentType)) {
+            this.responseContentType  = TEXT_PLAIN_CODER;
+            return this;
+        }
+        this.responseContentType = requestContentType;
+        return this;
+    }
+
+    public String getRequestContentType(boolean ifNullUseDefault) {
+        return Strings.isNullOrEmpty(requestContentType) && ifNullUseDefault ?
+                TEXT_PLAIN_CODER : requestContentType;
+    }
+
+    public RequestContext requestContentType(String contentType) {
+        this.requestContentType = contentType;
         return this;
     }
 
