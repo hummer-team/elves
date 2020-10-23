@@ -95,13 +95,24 @@ public class HttpServer implements ElvesServer {
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
+            close();
         }
     }
 
     @Override
     public void close() {
-        if (channel != null) {
-            channel.close();
+        try {
+            CommandHandlerContainer.getInstance().destroyCommandResource();
+        } catch (Throwable e) {
+            //ignore
         }
+        if (channel != null) {
+            try {
+                channel.close();
+            } catch (Throwable e) {
+                //ignore
+            }
+        }
+        log.debug("elves http server closed.");
     }
 }

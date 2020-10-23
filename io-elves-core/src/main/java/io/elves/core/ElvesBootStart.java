@@ -22,7 +22,7 @@ public class ElvesBootStart {
             server.start(args);
         } catch (Throwable e) {
             log.error("ElvesServer start failed", e);
-            System.exit(1);
+            System.exit(0);
         } finally {
             if (server != null) {
                 server.close();

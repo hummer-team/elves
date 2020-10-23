@@ -8,7 +8,7 @@ import io.elves.core.coder.Coder;
 import io.elves.core.command.CommandHandlerContainer;
 import io.elves.core.context.RequestContext;
 import io.elves.core.context.ResponseConext;
-import io.elves.core.handle.CommandHandle;
+import io.elves.core.handle.CommandHandler;
 import io.elves.core.response.CommandResponse;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -45,7 +45,7 @@ public class DispatchCommandHandler {
             throw new CommandException(BAD_REQUEST, "Invalid command name.");
         }
 
-        CommandHandle<?> commandHandler = CommandHandlerContainer
+        CommandHandler<?> commandHandler = CommandHandlerContainer
                 .getInstance()
                 .getHandle(requestContext.getCommandName());
         if (commandHandler == null) {
@@ -57,6 +57,7 @@ public class DispatchCommandHandler {
                 , new DefaultHttpHeaders().add("Content-Type", String.format("%s; charset=UTF-8"
                 , requestContext.getResponseContentType())));
 
+        commandHandler.destroy();
         requestContext.clean();
 
         return responseConext;
@@ -107,7 +108,7 @@ public class DispatchCommandHandler {
     }
 
     private byte[] innerHandler(RequestContext context
-            , CommandHandle<?> commandHandler) {
+            , CommandHandler<?> commandHandler) {
 
         long start = System.currentTimeMillis();
         CommandResponse<?> resp = commandHandler.handle(context);
