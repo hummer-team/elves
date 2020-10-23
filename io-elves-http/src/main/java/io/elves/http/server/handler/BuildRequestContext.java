@@ -1,6 +1,7 @@
 package io.elves.http.server.handler;
 
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import io.elves.core.coder.CodecContainer;
 import io.elves.core.context.RequestContext;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.elves.core.ElvesConstants.TEXT_PLAIN_CODER;
 import static io.elves.core.context.RequestContext.COMMAND_TARGET;
 
 /**
@@ -47,6 +49,9 @@ public class BuildRequestContext {
 
     private static String getContentType(HttpHeaders headers) {
         String contentType = headers.get("Content-Type");
+        if (Strings.isNullOrEmpty(contentType)) {
+            return TEXT_PLAIN_CODER;
+        }
         return Iterables.get(Splitter.on(";").split(contentType), 0);
     }
 

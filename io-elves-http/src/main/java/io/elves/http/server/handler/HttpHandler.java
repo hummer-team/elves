@@ -1,6 +1,7 @@
 package io.elves.http.server.handler;
 
 
+import com.google.common.base.Strings;
 import io.elves.common.exception.CommandException;
 import io.elves.core.context.ResponseConext;
 import io.netty.buffer.Unpooled;
@@ -20,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.nio.charset.StandardCharsets;
 
 import static io.elves.core.ElvesConstants.FAVICON_PATH;
-import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 import static io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
@@ -68,7 +68,11 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             if (ex instanceof CommandException) {
                 status = ((CommandException) ex).getStatus();
             }
-            writeErrorResponse(status, ex.getMessage(), ctx);
+            writeErrorResponse(status
+                    , Strings.isNullOrEmpty(ex.getMessage())
+                            ? status.toString()
+                            : ex.getMessage()
+                    , ctx);
             log.warn("http1 Internal error", ex);
         }
     }
