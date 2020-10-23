@@ -4,6 +4,7 @@ import io.elves.core.ElvesConstants;
 import io.elves.core.ElvesServer;
 import io.elves.core.command.CommandHandlerContainer;
 import io.elves.core.properties.ElvesProperties;
+import io.elves.http.server.banner.Banner;
 import io.elves.http.server.handler.HeartBeatServerHandler;
 import io.elves.http.server.handler.Http2OrHttpConfigure;
 import io.elves.http.server.handler.HttpHandler;
@@ -40,6 +41,7 @@ public class HttpServer implements ElvesServer {
 
     @Override
     public void init() throws IOException {
+        Banner.print();
         ElvesProperties.load(System.getProperty(ElvesConstants.PROFILES_ACTIVE));
         CommandHandlerContainer.getInstance().registerHandle();
     }
