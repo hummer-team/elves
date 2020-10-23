@@ -1,5 +1,6 @@
 package io.elves.core.command;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import io.elves.core.handle.CommandHandler;
 import io.elves.core.util.ServiceLoaderUtil;
@@ -64,8 +65,11 @@ public class CommandHandlerContainer {
     public void registerHandle() {
         Map<String, CommandHandler> handleMap = namedHandlers();
         for (Map.Entry<String, CommandHandler> handleEntry : handleMap.entrySet()) {
-            registerCommand(parseCommandName(handleEntry.getValue()), handleEntry.getValue());
-            initCommandHandle(handleEntry.getValue());
+            String commandName = parseCommandName(handleEntry.getValue());
+            if (!Strings.isNullOrEmpty(commandName)) {
+                registerCommand(commandName, handleEntry.getValue());
+                initCommandHandle(handleEntry.getValue());
+            }
         }
     }
 

@@ -30,4 +30,19 @@ public class ElvesHealthCommandHandler {
                     , Duration.between(DATE, LocalDateTime.now()).toMillis()));
         }
     }
+
+    @CommandMapping(name = "/")
+    public static class Index implements CommandHandler<String> {
+
+        /**
+         * implement business process
+         *
+         * @param context request context
+         * @return
+         */
+        @Override
+        public CommandResponse<String> handle(RequestContext context) {
+            return CommandResponse.ofSuccess("io-elves-http:v1");
+        }
+    }
 }
