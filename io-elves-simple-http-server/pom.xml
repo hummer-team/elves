@@ -16,6 +16,18 @@
             <groupId>io.elves</groupId>
             <artifactId>io-elves-all</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.elves</groupId>
+            <artifactId>io-elves-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.elves</groupId>
+            <artifactId>io-elves-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.elves</groupId>
+            <artifactId>io-elves-http</artifactId>
+        </dependency>
     </dependencies>
     <profiles>
         <profile>
@@ -50,13 +62,16 @@
     </profiles>
     <build>
         <plugins>
+            <!--disable deploy-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.2</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
             </plugin>
+            <!--copy resources-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -85,6 +100,7 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--compiler target version-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -94,6 +110,7 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+            <!--exec jar-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -109,6 +126,11 @@
                         <configuration>
                             <filters>
                                 <filter>
+                                    <includes>
+                                        <include>src/main/resources</include>
+                                    </includes>
+                                </filter>
+                                <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
                                         <exclude>module-info.class</exclude>
@@ -119,10 +141,11 @@
                                 </filter>
                             </filters>
                             <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>io.elves.simple.http.server.ApplicationStart</mainClass>
                                 </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+
                             </transformers>
                         </configuration>
                     </execution>

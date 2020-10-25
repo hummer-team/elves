@@ -55,7 +55,6 @@ public class CommandHandlerContainer {
             throw new RuntimeException(String.format("command Register failed (duplicate command) %s", commandName));
         }
         HANDLER_MAP.put(commandName, handler);
-        log.debug("[{} -> {}] register done.", commandName, handler);
     }
 
     public CommandHandler getHandle(String name) {
@@ -68,14 +67,14 @@ public class CommandHandlerContainer {
             String commandName = parseCommandName(handleEntry.getValue());
             if (!Strings.isNullOrEmpty(commandName)) {
                 registerCommand(commandName, handleEntry.getValue());
-                initCommandHandle(commandName,handleEntry.getValue());
+                initCommandHandle(handleEntry.getValue());
+                log.debug("[{} -> {}] register done,init done.",commandName, handleEntry.getValue());
             }
         }
     }
 
-    private void initCommandHandle(String commandName,CommandHandler handler) {
+    private void initCommandHandle(CommandHandler handler) {
         handler.init();
-        log.debug("[{} -> {}] init done.",commandName, handler);
     }
 
     private String parseCommandName(CommandHandler handler) {

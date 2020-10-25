@@ -1,10 +1,11 @@
 package io.elves.http.server.banner;
 
+import io.elves.common.util.ResourceUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 @Slf4j
@@ -14,12 +15,14 @@ public class Banner {
     }
 
     public static void print() {
-        String url = Banner.class.getClassLoader().getResource("banner.txt").getPath();
-        File file = new File(url);
-        try (FileInputStream f = new FileInputStream(file)) {
-            byte[] content = new byte[(int) file.length()];
-            f.read(content);
-            System.out.println(StringUtils.toEncodedString(content, StandardCharsets.UTF_8));
+        try (InputStream stream = ResourceUtil.getResourceAsStream(Banner.class.getClassLoader(), "banner.txt");
+             BufferedReader f = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
+            int r;
+            StringBuilder stringBuilder = new StringBuilder();
+            while ((r = f.read()) != -1) {
+                stringBuilder.append((char) r);
+            }
+            System.out.println(stringBuilder.toString());
         } catch (Exception e) {
             //ignore
         }

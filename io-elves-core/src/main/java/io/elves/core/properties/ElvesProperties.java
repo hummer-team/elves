@@ -1,5 +1,7 @@
 package io.elves.core.properties;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -12,6 +14,7 @@ import static io.elves.core.ElvesConstants.DEFAULT_PORT;
  *
  * @author lee
  */
+@Slf4j
 public class ElvesProperties {
     private static final InnerElvesProperties ELVES_PROPERTIES = new InnerElvesProperties();
 
@@ -55,6 +58,7 @@ public class ElvesProperties {
         if (ELVES_PROPERTIES.isLoad()) {
             return;
         }
+        log.debug("elves profiles active {}", profilesActive);
         String fileName = String.format("elves-%s.properties", profilesActive);
         URL url = Thread.currentThread().getContextClassLoader().getResource(fileName);
         if (url == null) {
