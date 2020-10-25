@@ -74,24 +74,24 @@ public class ElvesProperties {
     }
 
     private static void parseProperties(Properties properties) {
-        ELVES_PROPERTIES.setH2(Boolean.parseBoolean(properties.getProperty("elves.h2", "false")));
-        ELVES_PROPERTIES.setIoThread(Integer.parseInt(properties.getProperty("elves.ioThread"
+        ELVES_PROPERTIES.setH2(Boolean.parseBoolean(properties.getProperty("elves.server.h2", "false")));
+        ELVES_PROPERTIES.setIoThread(Integer.parseInt(properties.getProperty("elves.server.ioThread"
                 , "" + Runtime.getRuntime().availableProcessors())));
-        ELVES_PROPERTIES.setWorkThread(Integer.parseInt(properties.getProperty("elves.workThread"
+        ELVES_PROPERTIES.setWorkThread(Integer.parseInt(properties.getProperty("elves.server.workThread"
                 , "" + Runtime.getRuntime().availableProcessors() * 2)));
-        ELVES_PROPERTIES.setCharset(properties.getProperty("elves.charset", "UTF-8"));
+        ELVES_PROPERTIES.setCharset(properties.getProperty("elves.server.charset", "UTF-8"));
         ELVES_PROPERTIES.setIdleReadTimeOutSecond(
-                Integer.parseInt(properties.getProperty("elves.idleReadTimeOutSecond", "45")));
+                Integer.parseInt(properties.getProperty("elves.server.idleReadTimeOutSecond", "45")));
         ELVES_PROPERTIES.setIdleWriteTimeoutSecond(
-                Integer.parseInt(properties.getProperty("elves.idleWriteTimeoutSecond", "0")));
-        ELVES_PROPERTIES.setBufferSize(Long.parseLong(properties.getProperty("elves.bufferSize"
+                Integer.parseInt(properties.getProperty("elves.server.idleWriteTimeoutSecond", "0")));
+        ELVES_PROPERTIES.setBufferSize(Long.parseLong(properties.getProperty("elves.server.bufferSize"
                 , "" + 10 * 1024 * 1024)));
-        ELVES_PROPERTIES.setHttpPort(Integer.parseInt(properties.getProperty("elves.port"
+        ELVES_PROPERTIES.setHttpPort(Integer.parseInt(properties.getProperty("elves.server.port"
                 , "" + DEFAULT_PORT)));
-        ELVES_PROPERTIES.setSslPort(Integer.parseInt(properties.getProperty("elves.sslPort"
+        ELVES_PROPERTIES.setSslPort(Integer.parseInt(properties.getProperty("elves.server.sslPort"
                 , "" + (DEFAULT_PORT + 1000))));
-        ELVES_PROPERTIES.setMaxRequestContentSize(Integer.parseInt(properties.getProperty("elves.maxRequestContentSize"
-                , "" + 10 * 1024 * 1024)));
+        ELVES_PROPERTIES.setMaxRequestContentSize(Integer.parseInt(
+                properties.getProperty("elves.server.maxRequestContentSize", "" + 10 * 1024 * 1024)));
 
         ELVES_PROPERTIES.setLoad(true);
     }
