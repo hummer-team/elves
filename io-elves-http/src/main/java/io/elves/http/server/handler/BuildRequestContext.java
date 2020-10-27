@@ -35,6 +35,7 @@ public class BuildRequestContext {
 
         return RequestContext
                 .build()
+                .uri(request.uri())
                 .headers(request.headers())
                 .requestContentType(getContentType(request.headers()))
                 .decoder(CodecContainer.getCoder(getContentType(request.headers())))

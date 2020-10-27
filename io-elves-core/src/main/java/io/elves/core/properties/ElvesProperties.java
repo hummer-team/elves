@@ -17,6 +17,7 @@ import static io.elves.core.ElvesConstants.DEFAULT_PORT;
 @Slf4j
 public class ElvesProperties {
     private static final InnerElvesProperties ELVES_PROPERTIES = new InnerElvesProperties();
+    private static Properties properties;
 
     public static int maxRequestContentSize() {
         return ELVES_PROPERTIES.getMaxRequestContentSize();
@@ -54,6 +55,10 @@ public class ElvesProperties {
         return ELVES_PROPERTIES.getSslPort();
     }
 
+    public static Properties getProperties() {
+        return properties;
+    }
+
     public static void load(String profilesActive) throws IOException {
         if (ELVES_PROPERTIES.isLoad()) {
             return;
@@ -64,7 +69,7 @@ public class ElvesProperties {
         if (url == null) {
             throw new IllegalArgumentException(String.format("this profile active %s invalid", profilesActive));
         }
-        Properties properties = new Properties(System.getProperties());
+        properties = new Properties(System.getProperties());
         try (InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName)) {
             properties.load(stream);
             parseProperties(properties);

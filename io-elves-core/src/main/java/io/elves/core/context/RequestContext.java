@@ -28,9 +28,19 @@ public class RequestContext {
     private String responseContentType;
     private byte[] body;
     private Coder decoder;
+    private String uri;
 
     public static RequestContext build() {
         return new RequestContext();
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public RequestContext uri(String uri) {
+        this.uri = uri;
+        return this;
     }
 
     public <T> T body(Class<T> clazz) {

@@ -8,15 +8,14 @@ import io.elves.http.server.banner.Banner;
 import io.elves.http.server.handler.HeartBeatServerHandler;
 import io.elves.http.server.handler.Http2OrHttpConfigure;
 import io.elves.http.server.handler.HttpHandler;
+import io.elves.http.server.platform.PlatformFactory;
 import io.elves.http.server.ssl.SslBuilder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
@@ -48,17 +47,18 @@ public class HttpServer implements ElvesServer {
 
     @Override
     public void start(String[] args) throws InterruptedException, CertificateException, SSLException {
-        EventLoopGroup bossGroup = new NioEventLoopGroup(ElvesProperties.getIoThread());
-        EventLoopGroup workerGroup = new NioEventLoopGroup(ElvesProperties.getWorkThread());
+        EventLoopGroup bossGroup = PlatformFactory.eventLoopGroup(ElvesProperties.getIoThread());
+        EventLoopGroup workerGroup = PlatformFactory.eventLoopGroup(ElvesProperties.getWorkThread());
 
         final SslContext sslContext = SslBuilder.configureTLSIfEnable();
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.option(ChannelOption.SO_BACKLOG, 1024);
             b.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
+                    .channel(PlatformFactory.channel())
                     .childOption(ChannelOption.TCP_NODELAY, true)
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
+                    .childOption(ChannelOption.SO_RCVBUF, (int) ElvesProperties.getBufferSize())
                     .handler(new LoggingHandler(LogLevel.DEBUG))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override

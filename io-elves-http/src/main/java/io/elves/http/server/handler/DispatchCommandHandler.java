@@ -53,14 +53,14 @@ public class DispatchCommandHandler {
                     , requestContext.getCommandName()));
         }
 
-        ResponseConext responseConext = new ResponseConext(innerHandler(requestContext, commandHandler)
-                , new DefaultHttpHeaders().add("Content-Type", String.format("%s; charset=UTF-8"
-                , requestContext.getResponseContentType())));
-
-        commandHandler.destroy();
-        requestContext.clean();
-
-        return responseConext;
+        try {
+            return new ResponseConext(innerHandler(requestContext, commandHandler)
+                    , new DefaultHttpHeaders().add("Content-Type", String.format("%s; charset=UTF-8"
+                    , requestContext.getResponseContentType())));
+        } finally {
+            commandHandler.destroy();
+            requestContext.clean();
+        }
     }
 
 
