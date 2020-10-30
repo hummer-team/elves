@@ -7,5 +7,6 @@ package io.elves.core.request;
 public enum HttpMethod {
     GET,
     POST,
-    PUT
+    PUT,
+    DELETED
 }

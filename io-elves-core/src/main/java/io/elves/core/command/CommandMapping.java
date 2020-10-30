@@ -9,6 +9,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import static io.elves.core.ElvesConstants.TEXT_PLAIN_CODER;
+
 /**
  * @author lee
  */
@@ -35,4 +37,11 @@ public @interface CommandMapping {
      * command name
      */
     String name();
+
+    /**
+     * set response object encoder format,default is {@link io.elves.core.ElvesConstants#TEXT_PLAIN_CODER}
+     * {@link io.elves.core.ElvesConstants#TEXT_PLAIN_CODER}
+     * {@link io.elves.core.ElvesConstants#JSON_CODER}
+     */
+    String respEncoderType() default TEXT_PLAIN_CODER;
 }

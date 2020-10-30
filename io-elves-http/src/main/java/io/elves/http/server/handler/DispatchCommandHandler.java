@@ -112,9 +112,11 @@ public class DispatchCommandHandler {
 
         long start = System.currentTimeMillis();
         CommandResponse<?> resp = commandHandler.handle(context);
+
         log.debug("command execute done, cost {} ms -> {}"
                 , System.currentTimeMillis() - start
                 , context.getCommandName());
-        return encodeResponseBody(resp, context.getRequestContentType(true));
+        return encodeResponseBody(resp
+                , CommandHandlerContainer.getInstance().getMetadata(context.getCommandName()).getRespEncoderType());
     }
 }

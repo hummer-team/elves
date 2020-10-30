@@ -4,6 +4,7 @@ package io.elves.http.server.handler;
 import com.google.common.base.Strings;
 import io.elves.common.exception.CommandException;
 import io.elves.core.context.ResponseConext;
+import io.elves.core.properties.ElvesProperties;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -83,6 +84,9 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                 Unpooled.copiedBuffer(message, StandardCharsets.UTF_8));
 
         httpResponse.headers().set("Content-Type", "text/plain; charset=UTF-8");
+        if (ElvesProperties.valueOfBoolean("elves.server.exception.connection.keepalive", "true")) {
+            httpResponse.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+        }
         ctx.write(httpResponse);
 
         ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);

@@ -1,5 +1,6 @@
 package io.elves.core.properties;
 
+import io.elves.common.util.Assert;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -57,6 +58,32 @@ public class ElvesProperties {
 
     public static Properties getProperties() {
         return properties;
+    }
+
+    public static <T> T valueOf(Object key, Object defaultValue) {
+        return (T) properties.getOrDefault(key, defaultValue);
+    }
+
+    public static Boolean valueOfBoolean(String key, String defaultValue) {
+        return Boolean.parseBoolean(properties.getProperty(key, defaultValue));
+    }
+
+    public static int valueOfInteger(String key, String defaultValue) {
+        return Integer.parseInt(properties.getProperty(key, defaultValue));
+    }
+
+    public static long valueOfLong(String key, String defaultValue) {
+        return Long.parseLong(properties.getProperty(key, defaultValue));
+    }
+
+    public static String valueOfString(String key, String defaultValue) {
+        return properties.getProperty(key, defaultValue);
+    }
+
+    public static String valueOfStringWithAssertNotNull(String key) {
+        String val = properties.getProperty(key);
+        Assert.notNull(val, String.format("key : %s not found", key));
+        return val;
     }
 
     public static void load(String profilesActive) throws IOException {
