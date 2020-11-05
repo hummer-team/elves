@@ -1,6 +1,7 @@
 package io.elves.core.properties;
 
 import io.elves.common.util.Assert;
+import io.elves.core.ElvesConstants;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -19,6 +20,7 @@ import static io.elves.core.ElvesConstants.DEFAULT_PORT;
 public class ElvesProperties {
     private static final InnerElvesProperties ELVES_PROPERTIES = new InnerElvesProperties();
     private static Properties properties;
+    private static boolean isLoad = false;
 
     public static int maxRequestContentSize() {
         return ELVES_PROPERTIES.getMaxRequestContentSize();
@@ -57,37 +59,50 @@ public class ElvesProperties {
     }
 
     public static Properties getProperties() {
+        checkIsLoadProperties();
         return properties;
     }
 
     public static <T> T valueOf(Object key, Object defaultValue) {
+        checkIsLoadProperties();
         return (T) properties.getOrDefault(key, defaultValue);
     }
 
     public static Boolean valueOfBoolean(String key, String defaultValue) {
+        checkIsLoadProperties();
         return Boolean.parseBoolean(properties.getProperty(key, defaultValue));
     }
 
     public static int valueOfInteger(String key, String defaultValue) {
+        checkIsLoadProperties();
         return Integer.parseInt(properties.getProperty(key, defaultValue));
     }
 
     public static long valueOfLong(String key, String defaultValue) {
+        checkIsLoadProperties();
         return Long.parseLong(properties.getProperty(key, defaultValue));
     }
 
     public static String valueOfString(String key, String defaultValue) {
+        checkIsLoadProperties();
         return properties.getProperty(key, defaultValue);
     }
 
     public static String valueOfStringWithAssertNotNull(String key) {
+        checkIsLoadProperties();
         String val = properties.getProperty(key);
         Assert.notNull(val, String.format("key : %s not found", key));
         return val;
     }
 
+    public static String getProfileActive() {
+        checkIsLoadProperties();
+        return properties.getProperty(ElvesConstants.PROFILES_ACTIVE);
+    }
+
+
     public static void load(String profilesActive) throws IOException {
-        if (ELVES_PROPERTIES.isLoad()) {
+        if (ELVES_PROPERTIES.isLoad() || isLoad) {
             return;
         }
         log.debug("elves profiles active {}", profilesActive);
@@ -100,7 +115,9 @@ public class ElvesProperties {
         try (InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName)) {
             properties.load(stream);
             parseProperties(properties);
+            isLoad = true;
         } catch (IOException e) {
+            isLoad = false;
             throw e;
         }
     }
@@ -126,6 +143,12 @@ public class ElvesProperties {
                 properties.getProperty("elves.server.maxRequestContentSize", "" + 10 * 1024 * 1024)));
 
         ELVES_PROPERTIES.setLoad(true);
+    }
+
+    private static void checkIsLoadProperties() {
+        if (!isLoad) {
+            throw new RuntimeException("please load properties.");
+        }
     }
 
     public String getCharset() {

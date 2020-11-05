@@ -16,6 +16,6 @@ public class HellwordCommandHandlerV2 implements CommandHandler<HellwordResp> {
     public CommandResponse<HellwordResp> handle(RequestContext context) {
         HellwordResp resp = new HellwordResp();
         resp.setName("hi:" + ((HellwordReq) context.body(HellwordReq.class)).getName());
-        return CommandResponse.ofSuccess(resp);
+        return CommandResponse.ok(resp);
     }
 }

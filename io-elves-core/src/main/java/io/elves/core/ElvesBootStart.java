@@ -18,6 +18,13 @@ public class ElvesBootStart {
         try {
             server = (ElvesServer) classz.newInstance();
             Runtime.getRuntime().addShutdownHook(new Thread(server::close));
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> ElvesShutdownHook.getAllHoots().forEach(hoot -> {
+                try {
+                    hoot.run();
+                } catch (Throwable e) {
+                    log.error("execute shutdown hook fail", e);
+                }
+            })));
             server.init();
             server.start(args);
         } catch (Throwable e) {

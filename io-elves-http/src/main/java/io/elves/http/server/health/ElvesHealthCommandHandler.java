@@ -15,7 +15,7 @@ public class ElvesHealthCommandHandler {
 
         @Override
         public CommandResponse<String> handle(RequestContext context) {
-            return CommandResponse.ofSuccess("ok");
+            return CommandResponse.ok("ok");
         }
     }
 
@@ -25,7 +25,7 @@ public class ElvesHealthCommandHandler {
 
         @Override
         public CommandResponse<String> handle(RequestContext context) {
-            return CommandResponse.ofSuccess(String.format("startAt:%s,upTime:%s"
+            return CommandResponse.ok(String.format("startAt:%s,upTime:%s"
                     , DATE.format(DateTimeFormatter.ISO_DATE_TIME)
                     , Duration.between(DATE, LocalDateTime.now()).toMillis()));
         }
@@ -42,7 +42,7 @@ public class ElvesHealthCommandHandler {
          */
         @Override
         public CommandResponse<String> handle(RequestContext context) {
-            return CommandResponse.ofSuccess("io-elves-http:v1");
+            return CommandResponse.ok("io-elves-http:v1");
         }
     }
 }

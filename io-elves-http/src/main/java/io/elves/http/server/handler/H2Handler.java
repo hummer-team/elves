@@ -1,7 +1,7 @@
 package io.elves.http.server.handler;
 
 import io.elves.common.exception.CommandException;
-import io.elves.core.context.ResponseConext;
+import io.elves.core.context.ResponseContext;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -22,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import static io.elves.core.ElvesConstants.FAVICON_PATH;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 import static io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND;
-import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpUtil.setContentLength;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
@@ -63,17 +62,19 @@ public class H2Handler extends SimpleChannelInboundHandler<FullHttpRequest> {
         //ignore request favicon.ico
         String streamId = streamId(request);
         if (FAVICON_PATH.equals(request.uri())) {
-            writeErrorResponse(ctx,NOT_FOUND,"",streamId);
+            writeErrorResponse(ctx, NOT_FOUND, "", streamId);
             return;
         }
         try {
-            ResponseConext respContext = DispatchCommandHandler.INSTANCE.handler(request);
+            ResponseContext respContext = DispatchCommandHandler.INSTANCE.handler(request);
 
 
             ByteBuf content = ctx.alloc().buffer(respContext.getBytes().length);
             content.writeBytes(respContext.getBytes());
 
-            FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK, content);
+            FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1
+                    , respContext.getStatus()
+                    , content);
             response.headers().add(respContext.getHeaders());
             writeResponse(ctx, streamId, response, HttpUtil.isKeepAlive(request));
 

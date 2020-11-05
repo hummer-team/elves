@@ -3,7 +3,7 @@ package io.elves.http.server.handler;
 
 import com.google.common.base.Strings;
 import io.elves.common.exception.CommandException;
-import io.elves.core.context.ResponseConext;
+import io.elves.core.context.ResponseContext;
 import io.elves.core.properties.ElvesProperties;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -62,7 +62,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         }
 
         try {
-            ResponseConext respContext = DispatchCommandHandler.INSTANCE.handler(request);
+            ResponseContext respContext = DispatchCommandHandler.INSTANCE.handler(request);
             writeResponse(respContext, ctx, HttpUtil.isKeepAlive(request));
         } catch (Throwable ex) {
             HttpResponseStatus status = INTERNAL_SERVER_ERROR;
@@ -93,13 +93,14 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     }
 
 
-    private void writeResponse(ResponseConext responseConext
+    private void writeResponse(HttpResponseStatus statusCode
+            , ResponseContext responseContext
             , ChannelHandlerContext ctx
             , boolean keepAlive) {
 
-        FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, OK,
-                ctx.alloc().buffer(responseConext.getBytes().length).writeBytes(responseConext.getBytes()));
-        httpResponse.headers().add(responseConext.getHeaders());
+        FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, statusCode,
+                ctx.alloc().buffer(responseContext.getBytes().length).writeBytes(responseContext.getBytes()));
+        httpResponse.headers().add(responseContext.getHeaders());
         httpResponse.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
         if (keepAlive) {
             httpResponse.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
@@ -107,5 +108,11 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
         }
         ctx.write(httpResponse);
+    }
+
+    private void writeResponse(ResponseContext responseContext
+            , ChannelHandlerContext ctx
+            , boolean keepAlive) {
+        writeResponse(responseContext.getStatus(), responseContext, ctx, keepAlive);
     }
 }

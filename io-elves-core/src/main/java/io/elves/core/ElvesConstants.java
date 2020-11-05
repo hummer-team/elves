@@ -8,6 +8,7 @@ public class ElvesConstants {
     public static final byte[] DELIMITER = "$".getBytes();
     public static final String PROFILES_ACTIVE = "elves.profiles.active";
     public static final String TEXT_PLAIN_CODER = "text/plain";
+    public static final String TEXT_PLAIN_INTEGER_CODER = "text/plain,int";
     public static final String JSON_CODER = "application/json";
     public static final String FORM_DATA_CODER = "multipart/form-data";
     public static final String X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";

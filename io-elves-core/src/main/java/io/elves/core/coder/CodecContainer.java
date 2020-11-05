@@ -31,6 +31,7 @@ public final class CodecContainer {
         registerCoder(ProtobufCoder.INSTANCE);
         registerCoder(JsonCoder.INSTANCE);
         registerCoder(SimpleStringCoder.INSTANCE);
+        registerCoder(SimpleIntegerCoder.INSTANCE);
     }
 
     private CodecContainer() {

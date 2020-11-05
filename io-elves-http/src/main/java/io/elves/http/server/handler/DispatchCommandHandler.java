@@ -7,7 +7,7 @@ import io.elves.core.coder.CodecContainer;
 import io.elves.core.coder.Coder;
 import io.elves.core.command.CommandHandlerContainer;
 import io.elves.core.context.RequestContext;
-import io.elves.core.context.ResponseConext;
+import io.elves.core.context.ResponseContext;
 import io.elves.core.handle.CommandHandler;
 import io.elves.core.response.CommandResponse;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
@@ -37,7 +37,7 @@ public class DispatchCommandHandler {
 
     }
 
-    public ResponseConext handler(final FullHttpRequest request) {
+    public ResponseContext handler(final FullHttpRequest request) {
         setRequestId(request);
         RequestContext requestContext = BuildRequestContext.parseRequest(request);
 
@@ -54,9 +54,7 @@ public class DispatchCommandHandler {
         }
 
         try {
-            return new ResponseConext(innerHandler(requestContext, commandHandler)
-                    , new DefaultHttpHeaders().add("Content-Type", String.format("%s; charset=UTF-8"
-                    , requestContext.getResponseContentType())));
+            return innerHandler(requestContext, commandHandler);
         } finally {
             commandHandler.destroy();
             requestContext.clean();
@@ -71,8 +69,8 @@ public class DispatchCommandHandler {
         MDC.put(SERVER_IP_KEY, IpUtil.getLocalIp());
     }
 
-    private Coder lookupEncoder(Class<?> clazz, String requestContextType) {
-        if (clazz == null) {
+    private Coder lookupEncoder(Class<?> dataClass, String requestContextType) {
+        if (dataClass == null) {
             throw new IllegalArgumentException("Bad class metadata");
         }
 
@@ -83,7 +81,7 @@ public class DispatchCommandHandler {
                     , requestContextType));
         }
 
-        if (encoder.canEncode(clazz)) {
+        if (encoder.canEncode(dataClass)) {
             return encoder;
         }
 
@@ -107,16 +105,21 @@ public class DispatchCommandHandler {
         return body;
     }
 
-    private byte[] innerHandler(RequestContext context
+    private ResponseContext innerHandler(RequestContext context
             , CommandHandler<?> commandHandler) {
 
         long start = System.currentTimeMillis();
         CommandResponse<?> resp = commandHandler.handle(context);
 
-        log.debug("command execute done, cost {} ms -> {}"
-                , System.currentTimeMillis() - start
-                , context.getCommandName());
-        return encodeResponseBody(resp
+        log.debug("command {} - cost {} ms"
+                , context.getCommandName()
+                , System.currentTimeMillis() - start);
+        byte[] bytes = encodeResponseBody(resp
                 , CommandHandlerContainer.getInstance().getMetadata(context.getCommandName()).getRespEncoderType());
+
+        return new ResponseContext(bytes
+                , new DefaultHttpHeaders().add("Content-Type", String.format("%s; charset=UTF-8"
+                , context.getResponseContentType()))
+                , resp.getStatus());
     }
 }

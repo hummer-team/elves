@@ -10,6 +10,6 @@ import io.elves.core.response.CommandResponse;
 public class HellwordCommandHandler implements CommandHandler<String> {
     @Override
     public CommandResponse<String> handle(RequestContext context) {
-        return CommandResponse.ofSuccess("hellword");
+        return CommandResponse.ok("hellword");
     }
 }

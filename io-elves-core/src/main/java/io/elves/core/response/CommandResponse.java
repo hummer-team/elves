@@ -1,5 +1,6 @@
 package io.elves.core.response;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import org.slf4j.MDC;
 
 import static io.elves.core.ElvesConstants.REQUEST_ID_KEY;
@@ -17,15 +18,21 @@ public class CommandResponse<R> {
     private final transient Throwable exception;
     private String message;
     private String trackId;
+    private final transient HttpResponseStatus status;
 
     private CommandResponse(R data) {
-        this(data, 0, null);
+        this(data, 0, null, HttpResponseStatus.OK);
     }
 
-    private CommandResponse(R data, int code, Throwable exception) {
+    private CommandResponse(R data, HttpResponseStatus status) {
+        this(data, 0, null, status);
+    }
+
+    private CommandResponse(R data, int code, Throwable exception, HttpResponseStatus status) {
         this.code = code;
         this.data = data;
         this.exception = exception;
+        this.status = status;
     }
 
     /**
@@ -35,8 +42,12 @@ public class CommandResponse<R> {
      * @param <T>    type of the result
      * @return constructed server response
      */
-    public static <T> CommandResponse<T> ofSuccess(T result) {
+    public static <T> CommandResponse<T> ok(T result) {
         return new CommandResponse<T>(result);
+    }
+
+    public static <T> CommandResponse<T> ok(T result, HttpResponseStatus status) {
+        return new CommandResponse<T>(result, status);
     }
 
     /**
@@ -45,8 +56,11 @@ public class CommandResponse<R> {
      * @param ex cause of the failure
      * @return constructed server response
      */
-    public static <T> CommandResponse<T> ofFailure(Throwable ex) {
-        return new CommandResponse<T>(null, -50000, ex);
+    public static <T> CommandResponse<T> failure(Throwable ex) {
+        return new CommandResponse<T>(null
+                , -50000
+                , ex
+                , HttpResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -56,8 +70,8 @@ public class CommandResponse<R> {
      * @param result additional message of the failure
      * @return constructed server response
      */
-    public static <T> CommandResponse<T> ofFailure(Throwable ex, T result) {
-        return new CommandResponse<T>(result, -50000, ex);
+    public static <T> CommandResponse<T> failure(Throwable ex, T result) {
+        return new CommandResponse<T>(result, -50000, ex, HttpResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
     public int getCode() {
@@ -82,5 +96,9 @@ public class CommandResponse<R> {
 
     public String getTrackId() {
         return MDC.get(REQUEST_ID_KEY);
+    }
+
+    public HttpResponseStatus getStatus() {
+        return status;
     }
 }

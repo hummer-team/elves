@@ -64,7 +64,7 @@ public class SimpleStringCoder implements Coder {
      */
     @Override
     public <T> T decode(byte[] bytes, Class<T> target, Charset charset) {
-        if (!String.class.isAssignableFrom(target)) {
+        if (!canDecode(target)) {
             throw new IllegalArgumentException("target must string type");
         }
         return (T) new String(bytes, charset);

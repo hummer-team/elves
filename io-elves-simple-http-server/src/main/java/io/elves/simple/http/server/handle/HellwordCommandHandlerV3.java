@@ -15,6 +15,6 @@ public class HellwordCommandHandlerV3 implements CommandHandler<Map<String, Stri
 
     @Override
     public CommandResponse<Map<String, String>> handle(RequestContext context) {
-        return CommandResponse.ofSuccess(context.getParameters());
+        return CommandResponse.ok(context.getParameters());
     }
 }
