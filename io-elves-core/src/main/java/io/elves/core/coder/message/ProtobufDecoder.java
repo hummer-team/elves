@@ -8,7 +8,7 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-public class MessageDecoder extends ByteToMessageDecoder {
+public class ProtobufDecoder extends ByteToMessageDecoder {
 
     /**
      * Decode the from one {@link ByteBuf} to an other. This method will be called till either the input

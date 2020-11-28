@@ -3,7 +3,7 @@ package io.elves.http.server.handler;
 import com.google.common.base.Strings;
 import io.elves.common.exception.CommandException;
 import io.elves.common.util.IpUtil;
-import io.elves.core.coder.CodecContainer;
+import io.elves.core.coder.CoderContainer;
 import io.elves.core.coder.Coder;
 import io.elves.core.command.CommandHandlerContainer;
 import io.elves.core.context.RequestContext;
@@ -74,7 +74,7 @@ public class DispatchCommandHandler {
             throw new IllegalArgumentException("Bad class metadata");
         }
 
-        Coder encoder = CodecContainer.getCoder(requestContextType);
+        Coder encoder = CoderContainer.getCoder(requestContextType);
         if (encoder == null) {
             log.error("command handle encoder {} not support", requestContextType);
             throw new CommandException(NOT_IMPLEMENTED, String.format("server encoder not implement -> %s"

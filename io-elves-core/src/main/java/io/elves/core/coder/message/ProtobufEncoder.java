@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 
 import static io.elves.core.ElvesConstants.DELIMITER;
 
-public class MessageEncoder extends MessageToByteEncoder {
+public class ProtobufEncoder extends MessageToByteEncoder {
     /**
      * Encode a message into a {@link ByteBuf}. This method will be called for each written message that can be handled
      * by this encoder.

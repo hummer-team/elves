@@ -3,7 +3,7 @@ package io.elves.http.server.handler;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
-import io.elves.core.coder.CodecContainer;
+import io.elves.core.coder.CoderContainer;
 import io.elves.core.context.RequestContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
@@ -38,7 +38,7 @@ public class BuildRequestContext {
                 .uri(request.uri())
                 .headers(request.headers())
                 .requestContentType(getContentType(request.headers()))
-                .decoder(CodecContainer.getCoder(getContentType(request.headers())))
+                .decoder(CoderContainer.getCoder(getContentType(request.headers())))
                 .responseContentType(getContentType(request.headers()))
                 .param(parseQueryParam(queryStringDecoder))
                 .param(parsePostParam(request))

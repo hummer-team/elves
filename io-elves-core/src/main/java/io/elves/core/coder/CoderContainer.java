@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author lee
  */
-public final class CodecContainer {
+public final class CoderContainer {
 
     private static final Map<String, Coder> CODER_MAP = new ConcurrentHashMap<>();
 
@@ -34,7 +34,7 @@ public final class CodecContainer {
         registerCoder(SimpleIntegerCoder.INSTANCE);
     }
 
-    private CodecContainer() {
+    private CoderContainer() {
 
     }
 

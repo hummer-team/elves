@@ -23,7 +23,7 @@ public class PlatformFactory {
             epollSupport = enableEpoll() && Epoll.isAvailable();
             kqueueSupport = enableKqueue() && KQueue.isAvailable();
         } catch (Throwable e) {
-
+            //ignore
         }
     }
 
@@ -56,11 +56,11 @@ public class PlatformFactory {
 
     private static boolean enableEpoll() {
         return "true".equals(ElvesProperties.getProperties().getProperty("elves.server.platform.enable.epoll"
-                ,"false"));
+                , "false"));
     }
 
     private static boolean enableKqueue() {
         return "true".equals(ElvesProperties.getProperties().getProperty("elves.server.platform.enable.kqueue"
-                ,"false"));
+                , "false"));
     }
 }
