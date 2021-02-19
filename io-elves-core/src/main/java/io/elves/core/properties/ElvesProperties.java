@@ -2,6 +2,9 @@ package io.elves.core.properties;
 
 import io.elves.common.util.Assert;
 import io.elves.core.ElvesConstants;
+import io.elves.core.life.Life;
+import io.elves.core.life.LifeApplicationContext;
+import io.elves.core.life.LifeX;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -58,6 +61,10 @@ public class ElvesProperties {
         return ELVES_PROPERTIES.getSslPort();
     }
 
+    public static String getProfilesActive() {
+        return ELVES_PROPERTIES.getProfilesActive();
+    }
+
     public static Properties getProperties() {
         checkIsLoadProperties();
         return properties;
@@ -100,12 +107,12 @@ public class ElvesProperties {
         return properties.getProperty(ElvesConstants.PROFILES_ACTIVE);
     }
 
-
-    public static void load(String profilesActive) throws IOException {
+    public static void load() throws IOException {
         if (ELVES_PROPERTIES.isLoad() || isLoad) {
             return;
         }
-        log.debug("elves profiles active {}", profilesActive);
+        String profilesActive = System.getProperty(ElvesConstants.PROFILES_ACTIVE);
+        log.debug("elves profiles active - {}", profilesActive);
         String fileName = String.format("elves-%s.properties", profilesActive);
         URL url = Thread.currentThread().getContextClassLoader().getResource(fileName);
         if (url == null) {
@@ -116,6 +123,7 @@ public class ElvesProperties {
             properties.load(stream);
             parseProperties(properties);
             isLoad = true;
+            log.debug("properties load done total item count {}", properties.size());
         } catch (IOException e) {
             isLoad = false;
             throw e;
@@ -142,6 +150,7 @@ public class ElvesProperties {
         ELVES_PROPERTIES.setMaxRequestContentSize(Integer.parseInt(
                 properties.getProperty("elves.server.maxRequestContentSize", "" + 10 * 1024 * 1024)));
 
+        ELVES_PROPERTIES.setProfilesActive(properties.getProperty("elves.profiles.active"));
         ELVES_PROPERTIES.setLoad(true);
     }
 
@@ -149,6 +158,26 @@ public class ElvesProperties {
         if (!isLoad) {
             throw new RuntimeException("please load properties.");
         }
+    }
+
+    @LifeX
+    public void registerProperties() {
+        LifeApplicationContext.register(() -> new Life() {
+            @Override
+            public void postconstruct() {
+
+            }
+
+            @Override
+            public void destroy() {
+
+            }
+
+            @Override
+            public int sort() {
+                return Integer.MIN_VALUE + 2;
+            }
+        });
     }
 
     public String getCharset() {
@@ -167,6 +196,15 @@ public class ElvesProperties {
         private int httpPort;
         private int sslPort;
         private int maxRequestContentSize;
+        private String profilesActive;
+
+        public String getProfilesActive() {
+            return profilesActive;
+        }
+
+        public void setProfilesActive(String profilesActive) {
+            this.profilesActive = profilesActive;
+        }
 
         public boolean isLoad() {
             return load;

@@ -1,11 +1,8 @@
 package io.elves.core;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * @author lee
  */
-@Slf4j
 public class ElvesBootStart {
 
     private ElvesBootStart() {
@@ -13,22 +10,26 @@ public class ElvesBootStart {
     }
 
     public static void run(Class<?> classz, String[] args) {
-        checkIsElvesServer(classz);
+        ElvesApplication application = classz.getAnnotation(ElvesApplication.class);
+        if (application == null) {
+            throw new RuntimeException("please appoint ElvesServer.");
+        }
+
         ElvesServer server = null;
         try {
-            server = (ElvesServer) classz.newInstance();
+            server = application.bootServer().newInstance();
             Runtime.getRuntime().addShutdownHook(new Thread(server::close));
             Runtime.getRuntime().addShutdownHook(new Thread(() -> ElvesShutdownHook.getAllHoots().forEach(hoot -> {
                 try {
                     hoot.run();
                 } catch (Throwable e) {
-                    log.error("execute shutdown hook fail", e);
+                    System.err.printf("execute shutdown hook fail %s \n", e);
                 }
             })));
-            server.init();
+            server.init(application);
             server.start(args);
         } catch (Throwable e) {
-            log.error("ElvesServer start failed", e);
+            System.err.printf("ElvesServer start failed %s", e);
             System.exit(0);
         } finally {
             if (server != null) {

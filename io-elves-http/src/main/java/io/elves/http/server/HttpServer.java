@@ -1,8 +1,16 @@
 package io.elves.http.server;
 
-import io.elves.core.ElvesConstants;
+import com.google.common.base.Strings;
+import io.elves.common.util.ResourceUtil;
+import io.elves.core.ElvesApplication;
 import io.elves.core.ElvesServer;
+import io.elves.core.command.CommandActionMapping;
+import io.elves.core.command.CommandConext;
 import io.elves.core.command.CommandHandlerContainer;
+import io.elves.core.command.CommandHandlerMapping;
+import io.elves.core.life.LifeApplicationContext;
+import io.elves.core.life.LifeX;
+import io.elves.core.log.LogRegister;
 import io.elves.core.properties.ElvesProperties;
 import io.elves.http.server.banner.Banner;
 import io.elves.http.server.handler.HeartBeatServerHandler;
@@ -27,8 +35,10 @@ import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLException;
-import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.security.cert.CertificateException;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -39,9 +49,13 @@ public class HttpServer implements ElvesServer {
     private Channel channel;
 
     @Override
-    public void init() throws IOException {
+    public void init(ElvesApplication application) throws Exception {
         Banner.print();
-        ElvesProperties.load(System.getProperty(ElvesConstants.PROFILES_ACTIVE));
+        LogRegister.init();
+        ElvesProperties.load();
+        registerLifeXAndExecute();
+        //
+        registerCommand(application);
         CommandHandlerContainer.getInstance().registerHandle();
     }
 
@@ -108,6 +122,13 @@ public class HttpServer implements ElvesServer {
         } catch (Throwable e) {
             //ignore
         }
+
+        try {
+            LifeApplicationContext.destroy();
+        } catch (Throwable e) {
+            //ignore
+        }
+
         if (channel != null) {
             try {
                 channel.close();
@@ -116,5 +137,60 @@ public class HttpServer implements ElvesServer {
             }
         }
         log.debug("elves http server closed.");
+    }
+
+    private void registerLifeXAndExecute() {
+        Set<Class<?>> classes = ResourceUtil.getClassesByPackageName("io/elves");
+        for (Class<?> cl : classes) {
+            Method[] methods = cl.getMethods();
+            for (Method m : methods) {
+                LifeX life = m.getAnnotation(LifeX.class);
+                if (life != null) {
+                    try {
+                        Constructor c0 = cl.getDeclaredConstructor();
+                        c0.setAccessible(true);
+                        m.setAccessible(true);
+                        m.invoke(c0.newInstance());
+                    } catch (Throwable e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+
+        LifeApplicationContext.postconstruct();
+    }
+
+    private void registerCommand(ElvesApplication application) {
+        String scanPackage = application.scanPackage();
+        if (Strings.isNullOrEmpty(scanPackage)) {
+            throw new RuntimeException("scan package can't null");
+        }
+
+        Set<Class<?>> classes = ResourceUtil.getClassesByPackageName(scanPackage);
+        for (Class<?> cl : classes) {
+            CommandHandlerMapping handlerMapping = cl.getAnnotation(CommandHandlerMapping.class);
+            if (handlerMapping != null) {
+                Method[] methods = cl.getMethods();
+                for (Method m : methods) {
+                    CommandActionMapping actionMapping = m.getAnnotation(CommandActionMapping.class);
+                    if (actionMapping != null) {
+                        String commandPath = String.format("%s-%s%s"
+                                , actionMapping.httpMethod()
+                                , handlerMapping.name()
+                                , actionMapping.name());
+                        CommandHandlerContainer.getInstance().registerCommand(commandPath
+                                , new CommandConext(null
+                                        , actionMapping.name()
+                                        , actionMapping.desc()
+                                        , actionMapping.async()
+                                        , actionMapping.httpMethod()
+                                        , actionMapping.respEncoderType()
+                                        , m
+                                        , ResourceUtil.tryInstance(cl)));
+                    }
+                }
+            }
+        }
     }
 }

@@ -1,14 +1,23 @@
 package io.elves.common.util;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.reflect.Constructor;
+import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class ResourceUtil {
     private static final String CLASSPATH_PREFIX = "classpath:";
@@ -182,4 +191,106 @@ public class ResourceUtil {
         return new File(getResourceUrl(loader, resource).getFile());
     }
 
+    /**
+     * get package include class
+     *
+     * @param packageName package name
+     * @return
+     */
+    public static Set<Class<?>> getClassesByPackageName(String packageName) {
+        Set<Class<?>> classes = new HashSet<>(16);
+        String packageDirName = packageName.replace('.', '/');
+        Enumeration<URL> dirs;
+        try {
+            dirs = Thread.currentThread().getContextClassLoader().getResources(packageDirName);
+            while (dirs.hasMoreElements()) {
+                URL url = dirs.nextElement();
+                String protocol = url.getProtocol();
+                if ("file".equals(protocol)) {
+                    String filePath = URLDecoder.decode(url.getFile(), "UTF-8");
+                    findAndAddClassesInPackageByFile(packageName.replace("/", ".")
+                            , filePath, true, classes);
+                } else if ("jar".equals(protocol)) {
+                    JarFile jar;
+                    try {
+                        jar = ((JarURLConnection) url.openConnection()).getJarFile();
+                        Enumeration<JarEntry> entries = jar.entries();
+                        while (entries.hasMoreElements()) {
+                            JarEntry entry = entries.nextElement();
+                            String name = entry.getName();
+                            if (name.charAt(0) == '/') {
+                                name = name.substring(1);
+                            }
+                            if (name.startsWith(packageDirName)) {
+                                int idx = name.lastIndexOf('/');
+                                if (idx != -1) {
+                                    packageName = name.substring(0, idx).replace('/', '.');
+                                }
+                                if ((idx != -1) || true) {
+                                    if (name.endsWith(".class") && !entry.isDirectory()) {
+                                        String className = name.substring(packageName.length() + 1, name.length() - 6);
+                                        try {
+                                            classes.add(Class.forName(packageName + '.' + className));
+                                        } catch (ClassNotFoundException e) {
+                                            System.err.println(e);
+                                            System.exit(-1);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } catch (IOException e) {
+                        System.err.println(e);
+                        System.exit(-1);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.err.println(e);
+            System.exit(-1);
+        }
+
+        return classes;
+    }
+
+    public static void findAndAddClassesInPackageByFile(String packageName
+            , String packagePath
+            , final boolean recursive
+            , Set<Class<?>> classes) {
+        File dir = new File(packagePath);
+        if (!dir.exists() || !dir.isDirectory()) {
+            return;
+        }
+        File[] dirfiles = dir.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                return (recursive && file.isDirectory()) || (file.getName().endsWith(".class"));
+            }
+        });
+        for (File file : dirfiles) {
+            if (file.isDirectory()) {
+                findAndAddClassesInPackageByFile(packageName + "." + file.getName(),
+                        file.getAbsolutePath(),
+                        recursive,
+                        classes);
+            } else {
+                String className = file.getName().substring(0, file.getName().length() - 6);
+                try {
+                    classes.add(Class.forName(packageName + '.' + className));
+                } catch (ClassNotFoundException e) {
+                    System.err.println(e);
+                }
+            }
+        }
+    }
+
+    public static Object tryInstance(Class<?> cl, Object... args) {
+        try {
+            Constructor c0 = cl.getDeclaredConstructor();
+            c0.setAccessible(true);
+            return c0.newInstance(args);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

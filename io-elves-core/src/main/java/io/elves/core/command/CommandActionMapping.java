@@ -15,9 +15,9 @@ import static io.elves.core.ElvesConstants.TEXT_PLAIN_CODER;
  * @author lee
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
+@Target({ElementType.TYPE,ElementType.METHOD})
 @Documented
-public @interface CommandMapping {
+public @interface CommandActionMapping {
     /**
      * command desc
      */
@@ -34,7 +34,7 @@ public @interface CommandMapping {
     HttpMethod httpMethod() default HttpMethod.GET;
 
     /**
-     * command name
+     * command name,e.g:/a/b
      */
     String name();
 

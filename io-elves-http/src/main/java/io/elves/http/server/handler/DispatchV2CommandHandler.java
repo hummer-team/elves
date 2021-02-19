@@ -3,19 +3,22 @@ package io.elves.http.server.handler;
 import com.google.common.base.Strings;
 import io.elves.common.exception.CommandException;
 import io.elves.common.util.IpUtil;
-import io.elves.core.coder.CoderContainer;
 import io.elves.core.coder.Coder;
+import io.elves.core.coder.CoderContainer;
+import io.elves.core.command.CommandConext;
 import io.elves.core.command.CommandHandlerContainer;
 import io.elves.core.context.RequestContext;
 import io.elves.core.context.ResponseContext;
-import io.elves.core.handle.CommandHandler;
 import io.elves.core.response.CommandResponse;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Parameter;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
@@ -30,10 +33,10 @@ import static io.netty.handler.codec.http.HttpResponseStatus.NOT_IMPLEMENTED;
  * @author lee
  */
 @Slf4j
-public class DispatchCommandHandler {
-    public static final DispatchCommandHandler INSTANCE = new DispatchCommandHandler();
+public class DispatchV2CommandHandler {
+    public static final DispatchV2CommandHandler INSTANCE = new DispatchV2CommandHandler();
 
-    private DispatchCommandHandler() {
+    private DispatchV2CommandHandler() {
 
     }
 
@@ -45,20 +48,45 @@ public class DispatchCommandHandler {
             throw new CommandException(BAD_REQUEST, "Invalid command name.");
         }
 
-        CommandHandler<?> commandHandler = CommandHandlerContainer
+        CommandConext commandConext = CommandHandlerContainer
                 .getInstance()
-                .getHandle(requestContext.getCommandName());
-        if (commandHandler == null) {
+                .getCommandContext(requestContext.getCommandName());
+        if (commandConext == null) {
             throw new CommandException(NOT_FOUND, String.format("not found -> \"%s\""
                     , requestContext.getCommandName()));
         }
 
         try {
-            return innerHandler(requestContext, commandHandler);
+            CommandResponse<?> resp = invoke(commandConext);
+
+            byte[] bytes = encodeResponseBody(resp, commandConext.getRespEncoderType());
+
+            return new ResponseContext(bytes
+                    , new DefaultHttpHeaders().add("Content-Type", String.format("%s; charset=UTF-8"
+                    , requestContext.getResponseContentType()))
+                    , resp.getStatus());
+
+        } catch (Throwable e) {
+            //todo handler exception
+            log.error("execute {} failed", commandConext.getName(), e);
+            throw new RuntimeException(e);
         } finally {
-            commandHandler.destroy();
             requestContext.clean();
         }
+    }
+
+    private CommandResponse<?> invoke(CommandConext commandConext)
+            throws IllegalAccessException, InvocationTargetException {
+        Parameter[] parameters = commandConext.getMethod().getParameters();
+        Object obj = null;
+        if (parameters == null) {
+            obj = commandConext.getMethod().invoke(commandConext.getTargetCommandObject());
+        } else {
+            obj = commandConext.getMethod().invoke(commandConext.getTargetCommandObject());
+        }
+        return obj instanceof CommandResponse
+                ? (CommandResponse) obj
+                : CommandResponse.ok(obj, HttpResponseStatus.OK);
     }
 
 
@@ -103,23 +131,5 @@ public class DispatchCommandHandler {
                     : body;
         }
         return body;
-    }
-
-    private ResponseContext innerHandler(RequestContext context
-            , CommandHandler<?> commandHandler) {
-
-        long start = System.currentTimeMillis();
-        CommandResponse<?> resp = commandHandler.handle(context);
-
-        log.debug("command {} - cost {} ms"
-                , context.getCommandName()
-                , System.currentTimeMillis() - start);
-        byte[] bytes = encodeResponseBody(resp
-                , CommandHandlerContainer.getInstance().getCommandContext(context.getCommandName()).getRespEncoderType());
-
-        return new ResponseContext(bytes
-                , new DefaultHttpHeaders().add("Content-Type", String.format("%s; charset=UTF-8"
-                , context.getResponseContentType()))
-                , resp.getStatus());
     }
 }

@@ -28,8 +28,8 @@ public final class CoderContainer {
     private static final Map<String, Coder> CODER_MAP = new ConcurrentHashMap<>();
 
     static {
-        registerCoder(ProtobufCoder.INSTANCE);
-        registerCoder(JsonCoder.INSTANCE);
+        registerCoder(ProtostuffCoder.INSTANCE);
+        registerCoder(FastJsonCoder.INSTANCE);
         registerCoder(SimpleStringCoder.INSTANCE);
         registerCoder(SimpleIntegerCoder.INSTANCE);
     }

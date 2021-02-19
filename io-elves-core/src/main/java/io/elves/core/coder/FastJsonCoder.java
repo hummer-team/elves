@@ -6,8 +6,8 @@ import java.nio.charset.Charset;
 
 import static io.elves.core.ElvesConstants.JSON_CODER;
 
-public class JsonCoder implements Coder {
-    public static final Coder INSTANCE = new JsonCoder();
+public class FastJsonCoder implements Coder {
+    public static final Coder INSTANCE = new FastJsonCoder();
     /**
      * Encode the given object into a byte array with the given charset.
      *

@@ -10,9 +10,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ProtobufCoder implements Coder {
+public class ProtostuffCoder implements Coder {
 
-    public static final Coder INSTANCE = new ProtobufCoder();
+    public static final Coder INSTANCE = new ProtostuffCoder();
 
     private static Map<Class<?>, Schema<?>> schemaCache = new ConcurrentHashMap<>();
 
@@ -70,6 +70,6 @@ public class ProtobufCoder implements Coder {
      */
     @Override
     public String codeName() {
-        return "application/protobuf";
+        return "application/protobuff";
     }
 }

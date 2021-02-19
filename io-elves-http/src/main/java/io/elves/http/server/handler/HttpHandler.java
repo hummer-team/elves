@@ -24,7 +24,6 @@ import java.nio.charset.StandardCharsets;
 import static io.elves.core.ElvesConstants.FAVICON_PATH;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 import static io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND;
-import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 
 /**
  * Netty-based HTTP server handler for command center.
@@ -62,7 +61,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         }
 
         try {
-            ResponseContext respContext = DispatchCommandHandler.INSTANCE.handler(request);
+            ResponseContext respContext = DispatchV2CommandHandler.INSTANCE.handler(request);
             writeResponse(respContext, ctx, HttpUtil.isKeepAlive(request));
         } catch (Throwable ex) {
             HttpResponseStatus status = INTERNAL_SERVER_ERROR;

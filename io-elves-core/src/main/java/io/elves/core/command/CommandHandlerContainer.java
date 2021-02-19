@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class CommandHandlerContainer {
     private final static CommandHandlerContainer INSTANCE = new CommandHandlerContainer();
-    private final static Map<String, CommandMetadata> HANDLER_MAP = new ConcurrentHashMap<>();
+    private final static Map<String, CommandConext> HANDLER_MAP = new ConcurrentHashMap<>();
     private final ServiceLoader<CommandHandler> serviceLoader = ServiceLoaderUtil.getServiceLoader(CommandHandler.class);
 
     public static CommandHandlerContainer getInstance() {
@@ -25,17 +25,17 @@ public class CommandHandlerContainer {
     }
 
     public void destroyCommandResource() {
-        for (Map.Entry<String, CommandMetadata> handler : HANDLER_MAP.entrySet()) {
+        for (Map.Entry<String, CommandConext> handler : HANDLER_MAP.entrySet()) {
             handler.getValue().getHandler().destroy();
             log.debug("destroy {} command handler resource", handler.getKey());
         }
         HANDLER_MAP.clear();
     }
 
-    public Map<String, CommandMetadata> namedHandlers() {
-        Map<String, CommandMetadata> map = new HashMap<>(16);
+    public Map<String, CommandConext> namedHandlers() {
+        Map<String, CommandConext> map = new HashMap<>(16);
         for (CommandHandler handler : serviceLoader) {
-            CommandMetadata metadata = parseCommand(handler);
+            CommandConext metadata = parseCommand(handler);
             if (metadata != null) {
                 if (map.containsKey(metadata.getName())) {
                     log.warn("Register failed (duplicate command): {}"
@@ -50,32 +50,32 @@ public class CommandHandlerContainer {
         return ImmutableMap.copyOf(map);
     }
 
-    private void registerCommand(String commandName, CommandMetadata commandMetadata) {
-        if (StringUtils.isEmpty(commandName) || commandMetadata == null) {
+    public void registerCommand(String commandName, CommandConext commandConext) {
+        if (StringUtils.isEmpty(commandName) || commandConext == null) {
             return;
         }
 
         if (HANDLER_MAP.containsKey(commandName)) {
-            log.warn("[NettyHttpCommandCenter] Register failed (duplicate command): {}", commandName);
+            log.warn("register failed (duplicate command): {}", commandName);
             throw new RuntimeException(String.format("command Register failed (duplicate command) %s", commandName));
         }
-        HANDLER_MAP.put(commandName, commandMetadata);
+        HANDLER_MAP.put(commandName, commandConext);
+        log.debug("[{} -> {}] register done,init done.",commandName,commandConext);
     }
 
     public CommandHandler getHandle(String name) {
         return HANDLER_MAP.get(name).getHandler();
     }
 
-    public CommandMetadata getMetadata(String name) {
+    public CommandConext getCommandContext(String name) {
         return HANDLER_MAP.get(name);
     }
 
     public void registerHandle() {
-        Map<String, CommandMetadata> handleMap = namedHandlers();
-        for (Map.Entry<String, CommandMetadata> handleEntry : handleMap.entrySet()) {
+        Map<String, CommandConext> handleMap = namedHandlers();
+        for (Map.Entry<String, CommandConext> handleEntry : handleMap.entrySet()) {
             registerCommand(handleEntry.getKey(), handleEntry.getValue());
             initCommandHandle(handleEntry.getValue().getHandler());
-            log.debug("[{} -> {}] register done,init done.", handleEntry.getKey(), handleEntry.getValue());
         }
     }
 
@@ -84,7 +84,7 @@ public class CommandHandlerContainer {
     }
 
     private String parseCommandName(CommandHandler handler) {
-        CommandMapping commandMapping = handler.getClass().getAnnotation(CommandMapping.class);
+        CommandActionMapping commandMapping = handler.getClass().getAnnotation(CommandActionMapping.class);
         if (commandMapping != null) {
             return String.format("%s-%s", commandMapping.httpMethod(), commandMapping.name());
         } else {
@@ -92,17 +92,19 @@ public class CommandHandlerContainer {
         }
     }
 
-    private CommandMetadata parseCommand(CommandHandler handler) {
-        CommandMapping commandMapping = handler.getClass().getAnnotation(CommandMapping.class);
+    private CommandConext parseCommand(CommandHandler handler) {
+        CommandActionMapping commandMapping = handler.getClass().getAnnotation(CommandActionMapping.class);
         if (commandMapping == null) {
             return null;
         }
 
-        return new CommandMetadata(handler
+        return new CommandConext(handler
                 , String.format("%s-%s", commandMapping.httpMethod(), commandMapping.name())
                 , commandMapping.desc()
                 , commandMapping.async()
                 , commandMapping.httpMethod()
-                , commandMapping.respEncoderType());
+                , commandMapping.respEncoderType()
+                , null
+                , null);
     }
 }

@@ -38,6 +38,8 @@
         <commons-collections.version>3.2.2</commons-collections.version>
         <maven.source.version>3.2.0</maven.source.version>
         <maven.javadoc.version>3.2.0</maven.javadoc.version>
+        <protobuf-java.version>2.6.1</protobuf-java.version>
+        <protobuf-javanano.version>3.0.0-alpha-5</protobuf-javanano.version>
     </properties>
     <modules>
         <module>io-elves-http</module>
@@ -95,6 +97,17 @@
                 <groupId>io.elves</groupId>
                 <artifactId>io-elves-http</artifactId>
                 <version>${io.elves.version}</version>
+            </dependency>
+            <!-- Google Protocol Buffers - completely optional -->
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf-java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf.nano</groupId>
+                <artifactId>protobuf-javanano</artifactId>
+                <version>${protobuf-javanano.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
