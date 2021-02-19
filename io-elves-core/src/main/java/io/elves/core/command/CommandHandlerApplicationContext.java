@@ -15,13 +15,22 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author lee
  */
 @Slf4j
-public class CommandHandlerContainer {
-    private final static CommandHandlerContainer INSTANCE = new CommandHandlerContainer();
+public class CommandHandlerApplicationContext {
+    private final static CommandHandlerApplicationContext INSTANCE = new CommandHandlerApplicationContext();
     private final static Map<String, CommandConext> HANDLER_MAP = new ConcurrentHashMap<>();
     private final ServiceLoader<CommandHandler> serviceLoader = ServiceLoaderUtil.getServiceLoader(CommandHandler.class);
+    private GlobalExceptionHandler exceptionIntercept;
 
-    public static CommandHandlerContainer getInstance() {
+    public static CommandHandlerApplicationContext getInstance() {
         return INSTANCE;
+    }
+
+    public void registerExceptionIntercept(GlobalExceptionHandler intercept) {
+        exceptionIntercept = intercept;
+    }
+
+    public GlobalExceptionHandler getExceptionIntercept(){
+        return exceptionIntercept;
     }
 
     public void destroyCommandResource() {
@@ -46,7 +55,6 @@ public class CommandHandlerContainer {
                 map.put(metadata.getName(), metadata);
             }
         }
-        log.debug("load command handle item count: {}", map.size());
         return ImmutableMap.copyOf(map);
     }
 
@@ -60,7 +68,7 @@ public class CommandHandlerContainer {
             throw new RuntimeException(String.format("command Register failed (duplicate command) %s", commandName));
         }
         HANDLER_MAP.put(commandName, commandConext);
-        log.debug("[{} -> {}] register done,init done.",commandName,commandConext);
+        log.debug("[{} -> {}] register done,init done.", commandName, commandConext.getTargetCommandObject());
     }
 
     public CommandHandler getHandle(String name) {

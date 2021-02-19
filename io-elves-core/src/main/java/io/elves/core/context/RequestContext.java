@@ -1,164 +1,38 @@
 package io.elves.core.context;
 
-import com.google.common.base.Strings;
-import io.elves.core.coder.Coder;
+import com.google.common.collect.ImmutableList;
 import io.netty.handler.codec.http.HttpHeaders;
-import org.apache.commons.lang3.StringUtils;
 
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-
-import static io.elves.core.ElvesConstants.FORM_DATA_CODER;
-import static io.elves.core.ElvesConstants.TEXT_PLAIN_CODER;
-import static io.elves.core.ElvesConstants.X_WWW_FORM_URLENCODED;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Command request representation of command center.
+ * this class is read only
  *
  * @author lee
  */
-public class RequestContext {
+public final class RequestContext {
+    private final byte[] body;
+    private final HttpHeaders headers;
 
-    public static final String COMMAND_TARGET = "command-target";
-    private final Map<String, String> metadata = new HashMap<String, String>();
-    private final Map<String, String> parameters = new HashMap<String, String>();
-    private HttpHeaders headers;
-    private String requestContentType;
-    private String responseContentType;
-    private byte[] body;
-    private Coder decoder;
-    private String uri;
-
-    public static RequestContext build() {
-        return new RequestContext();
+    public RequestContext(byte[] body, HttpHeaders headers) {
+        this.body = body;
+        this.headers = headers;
     }
 
-    public String getUri() {
-        return uri;
-    }
-
-    public RequestContext uri(String uri) {
-        this.uri = uri;
-        return this;
-    }
-
-    public <T> T body(Class<T> clazz) {
-        if (decoder == null) {
-            throw new IllegalArgumentException("decoder not found");
-        }
-        return decoder.decode(getBodyByte(), clazz, StandardCharsets.UTF_8);
-    }
-
-    public Coder getDecoder() {
-        return decoder;
-    }
-
-    public RequestContext decoder(Coder decoder) {
-        this.decoder = decoder;
-        return this;
-    }
-
-    public String getResponseContentType() {
-        return responseContentType;
-    }
-
-    public RequestContext responseContentType(String requestContentType) {
-        if (FORM_DATA_CODER.equals(requestContentType)) {
-            this.responseContentType  = TEXT_PLAIN_CODER;
-            return this;
-        }
-
-        if (X_WWW_FORM_URLENCODED.equals(requestContentType)) {
-            this.responseContentType  = TEXT_PLAIN_CODER;
-            return this;
-        }
-        this.responseContentType = requestContentType;
-        return this;
-    }
-
-    public String getRequestContentType(boolean ifNullUseDefault) {
-        return Strings.isNullOrEmpty(requestContentType) && ifNullUseDefault ?
-                TEXT_PLAIN_CODER : requestContentType;
-    }
-
-    public RequestContext requestContentType(String contentType) {
-        this.requestContentType = contentType;
-        return this;
-    }
-
-    public byte[] getBodyByte() {
+    public final byte[] getBody() {
         return body;
     }
 
-    public RequestContext body(byte[] body) {
-        this.body = body;
-        return this;
-    }
-
-    public Map<String, String> getParameters() {
-        return parameters;
-    }
-
-    public String getParam(String key) {
-        return parameters.get(key);
-    }
-
-    public String getParam(String key, String defaultValue) {
-        String value = parameters.get(key);
-        return StringUtils.isBlank(value) ? defaultValue : value;
-    }
-
-    public Map<String, String> getMetadata() {
-        return metadata;
-    }
-
-    public String getCommandName() {
-        return getMetadata().get(COMMAND_TARGET);
-    }
-
-    public HttpHeaders getHeaders() {
+    public final HttpHeaders getHeaders() {
         return headers;
     }
 
-    public RequestContext headers(HttpHeaders headers) {
-        this.headers = headers;
-        return this;
+    public final String getHeader(final String name) {
+        return headers == null ? "" : headers.get(name);
     }
 
-    public RequestContext param(String key, String value) {
-        if (StringUtils.isBlank(key)) {
-            throw new IllegalArgumentException("Parameter key cannot be empty");
-        }
-        parameters.put(key, value);
-        return this;
-    }
-
-    public RequestContext param(Map<String, String> paramMap) {
-        if (paramMap == null) {
-            return this;
-        }
-        parameters.putAll(paramMap);
-        return this;
-    }
-
-    public RequestContext metadata(String key, String value) {
-        if (StringUtils.isBlank(key)) {
-            throw new IllegalArgumentException("Metadata key cannot be empty");
-        }
-        metadata.put(key, value);
-        return this;
-    }
-
-    public RequestContext builder() {
-        //todo check
-        return this;
-    }
-
-    public void clean() {
-        metadata.clear();
-        parameters.clear();
-        headers.clear();
-        body = null;
+    public final List<String> getHeaderAll(final String name) {
+        return headers == null ? Collections.emptyList() : ImmutableList.copyOf(headers.getAll(name));
     }
 }

@@ -61,7 +61,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         }
 
         try {
-            ResponseContext respContext = DispatchV2CommandHandler.INSTANCE.handler(request);
+            ResponseContext respContext = DispatchV2CommandHandler.INSTANCE.dispatch(request);
             writeResponse(respContext, ctx, HttpUtil.isKeepAlive(request));
         } catch (Throwable ex) {
             HttpResponseStatus status = INTERNAL_SERVER_ERROR;

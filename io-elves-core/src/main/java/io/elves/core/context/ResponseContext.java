@@ -3,6 +3,9 @@ package io.elves.core.context;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
+/**
+ * @author lee
+ */
 public class ResponseContext {
     private final byte[] bytes;
     private final HttpHeaders headers;

@@ -1,7 +1,10 @@
 package io.elves.simple.http.server.handle;
 
 import io.elves.core.command.CommandActionMapping;
+import io.elves.core.command.CommandBody;
 import io.elves.core.command.CommandHandlerMapping;
+import io.elves.core.command.CommandUrlQueryParam;
+import io.elves.core.context.RequestContext;
 import io.elves.core.request.HttpMethod;
 import io.elves.core.response.CommandResponse;
 import io.elves.simple.http.server.dto.HellwordReq;
@@ -37,11 +40,23 @@ public class HellwordV3CommandHandler {
     }
 
     @CommandActionMapping(name = "/hh5"
-            , httpMethod = HttpMethod.GET
+            , httpMethod = HttpMethod.POST
             , respEncoderType = JSON_CODER)
-    public CommandResponse<HellwordResp> handler5(HellwordReq req) {
+    public CommandResponse<HellwordResp> handler5(
+            @CommandBody HellwordReq req, RequestContext context) {
         HellwordResp resp = new HellwordResp();
         resp.setName(req.getName());
+
         return CommandResponse.ok(resp);
+    }
+
+    @CommandActionMapping(name = "/hh6"
+            , httpMethod = HttpMethod.GET
+            , respEncoderType = JSON_CODER)
+    public CommandResponse<HellwordResp> handler6(
+            @CommandUrlQueryParam HellwordReq req, RequestContext context) {
+        HellwordResp resp = new HellwordResp();
+        resp.setName(req.getName());
+        throw new NullPointerException("ssssssfff");
     }
 }

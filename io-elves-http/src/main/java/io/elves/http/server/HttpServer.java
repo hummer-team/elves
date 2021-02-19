@@ -6,8 +6,10 @@ import io.elves.core.ElvesApplication;
 import io.elves.core.ElvesServer;
 import io.elves.core.command.CommandActionMapping;
 import io.elves.core.command.CommandConext;
-import io.elves.core.command.CommandHandlerContainer;
+import io.elves.core.command.CommandHandlerApplicationContext;
 import io.elves.core.command.CommandHandlerMapping;
+import io.elves.core.command.GlobalException;
+import io.elves.core.command.GlobalExceptionHandler;
 import io.elves.core.life.LifeApplicationContext;
 import io.elves.core.life.LifeX;
 import io.elves.core.log.LogRegister;
@@ -35,7 +37,6 @@ import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.security.cert.CertificateException;
 import java.util.Set;
@@ -50,13 +51,15 @@ public class HttpServer implements ElvesServer {
 
     @Override
     public void init(ElvesApplication application) throws Exception {
+        long start = System.currentTimeMillis();
         Banner.print();
         LogRegister.init();
         ElvesProperties.load();
-        registerLifeXAndExecute();
+        registerLifeXAndExecute(application);
         //
         registerCommand(application);
-        CommandHandlerContainer.getInstance().registerHandle();
+        CommandHandlerApplicationContext.getInstance().registerHandle();
+        log.debug("elves http server init done cost {} ms", System.currentTimeMillis() - start);
     }
 
     @Override
@@ -105,7 +108,7 @@ public class HttpServer implements ElvesServer {
                         }
                     });
             channel = b.bind(ElvesProperties.getPort()).sync().channel();
-            log.debug("elves http server start success,enable h2 {},bind port at {}", ElvesProperties.enableH2()
+            log.debug("elves http server start success,enable h2 {},port at {}", ElvesProperties.enableH2()
                     , ElvesProperties.getPort());
             channel.closeFuture().sync();
         } finally {
@@ -118,7 +121,7 @@ public class HttpServer implements ElvesServer {
     @Override
     public void close() {
         try {
-            CommandHandlerContainer.getInstance().destroyCommandResource();
+            CommandHandlerApplicationContext.getInstance().destroyCommandResource();
         } catch (Throwable e) {
             //ignore
         }
@@ -139,18 +142,16 @@ public class HttpServer implements ElvesServer {
         log.debug("elves http server closed.");
     }
 
-    private void registerLifeXAndExecute() {
-        Set<Class<?>> classes = ResourceUtil.getClassesByPackageName("io/elves");
+    private void registerLifeXAndExecute(ElvesApplication application) {
+        Set<Class<?>> classes = ResourceUtil.getClassesByPackageName(application.scanPackage());
         for (Class<?> cl : classes) {
             Method[] methods = cl.getMethods();
             for (Method m : methods) {
                 LifeX life = m.getAnnotation(LifeX.class);
                 if (life != null) {
                     try {
-                        Constructor c0 = cl.getDeclaredConstructor();
-                        c0.setAccessible(true);
                         m.setAccessible(true);
-                        m.invoke(c0.newInstance());
+                        m.invoke(ResourceUtil.tryInstance(cl));
                     } catch (Throwable e) {
                         throw new RuntimeException(e);
                     }
@@ -169,6 +170,15 @@ public class HttpServer implements ElvesServer {
 
         Set<Class<?>> classes = ResourceUtil.getClassesByPackageName(scanPackage);
         for (Class<?> cl : classes) {
+            //scan GlobalException handler
+            if (cl.getAnnotation(GlobalException.class) != null) {
+                Object exObj = ResourceUtil.tryInstance(cl);
+                if (exObj instanceof GlobalExceptionHandler) {
+                    CommandHandlerApplicationContext.getInstance()
+                            .registerExceptionIntercept((GlobalExceptionHandler)exObj);
+                }
+            }
+            //scan handler controller
             CommandHandlerMapping handlerMapping = cl.getAnnotation(CommandHandlerMapping.class);
             if (handlerMapping != null) {
                 Method[] methods = cl.getMethods();
@@ -179,7 +189,7 @@ public class HttpServer implements ElvesServer {
                                 , actionMapping.httpMethod()
                                 , handlerMapping.name()
                                 , actionMapping.name());
-                        CommandHandlerContainer.getInstance().registerCommand(commandPath
+                        CommandHandlerApplicationContext.getInstance().registerCommand(commandPath
                                 , new CommandConext(null
                                         , actionMapping.name()
                                         , actionMapping.desc()

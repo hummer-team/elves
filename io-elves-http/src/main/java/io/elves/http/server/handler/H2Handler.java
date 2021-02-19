@@ -66,7 +66,7 @@ public class H2Handler extends SimpleChannelInboundHandler<FullHttpRequest> {
             return;
         }
         try {
-            ResponseContext respContext = DispatchCommandHandler.INSTANCE.handler(request);
+            ResponseContext respContext = DispatchV2CommandHandler.INSTANCE.dispatch(request);
 
 
             ByteBuf content = ctx.alloc().buffer(respContext.getBytes().length);

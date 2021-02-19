@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class HellwordReq {
     private String name;
-    private Integer data
+    private Integer data;
 }

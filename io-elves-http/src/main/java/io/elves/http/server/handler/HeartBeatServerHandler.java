@@ -1,11 +1,17 @@
 package io.elves.http.server.handler;
 
+import io.elves.core.properties.ElvesProperties;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * close idle channel
+ *
+ * @author edz
+ */
 @Slf4j
 public class HeartBeatServerHandler extends ChannelInboundHandlerAdapter {
     /**
@@ -22,7 +28,10 @@ public class HeartBeatServerHandler extends ChannelInboundHandlerAdapter {
         if (evt instanceof IdleStateEvent) {
             boolean rIdle = ((IdleStateEvent) evt).state() == IdleState.READER_IDLE;
             if (rIdle) {
-                log.debug("close this idle channel {}", ctx.channel());
+                log.debug("close this idle read {} s - write {} s channel: {}"
+                        , ElvesProperties.getIdleReadTimeOutSecond()
+                        , ElvesProperties.getIdleWriteTimeoutSecond()
+                        , ctx.channel());
                 ctx.channel().close();
             }
         }

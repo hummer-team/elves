@@ -3,10 +3,10 @@ package io.elves.http.server.handler;
 import com.google.common.base.Strings;
 import io.elves.common.exception.CommandException;
 import io.elves.common.util.IpUtil;
-import io.elves.core.coder.CoderContainer;
 import io.elves.core.coder.Coder;
-import io.elves.core.command.CommandHandlerContainer;
-import io.elves.core.context.RequestContext;
+import io.elves.core.coder.CoderContainer;
+import io.elves.core.command.CommandHandlerApplicationContext;
+import io.elves.core.context.RequestContextInner;
 import io.elves.core.context.ResponseContext;
 import io.elves.core.handle.CommandHandler;
 import io.elves.core.response.CommandResponse;
@@ -28,8 +28,10 @@ import static io.netty.handler.codec.http.HttpResponseStatus.NOT_IMPLEMENTED;
 
 /**
  * @author lee
+ * @deprecated {@link io.elves.http.server.handler.DispatchV2CommandHandler}
  */
 @Slf4j
+@Deprecated
 public class DispatchCommandHandler {
     public static final DispatchCommandHandler INSTANCE = new DispatchCommandHandler();
 
@@ -37,27 +39,27 @@ public class DispatchCommandHandler {
 
     }
 
-    public ResponseContext handler(final FullHttpRequest request) {
+    public ResponseContext dispatch(final FullHttpRequest request) {
         setRequestId(request);
-        RequestContext requestContext = BuildRequestContext.parseRequest(request);
+        RequestContextInner requestContextInner = BuildRequestContext.parseRequest(request);
 
-        if (StringUtils.isBlank(requestContext.getCommandName())) {
+        if (StringUtils.isBlank(requestContextInner.getCommandName())) {
             throw new CommandException(BAD_REQUEST, "Invalid command name.");
         }
 
-        CommandHandler<?> commandHandler = CommandHandlerContainer
+        CommandHandler<?> commandHandler = CommandHandlerApplicationContext
                 .getInstance()
-                .getHandle(requestContext.getCommandName());
+                .getHandle(requestContextInner.getCommandName());
         if (commandHandler == null) {
             throw new CommandException(NOT_FOUND, String.format("not found -> \"%s\""
-                    , requestContext.getCommandName()));
+                    , requestContextInner.getCommandName()));
         }
 
         try {
-            return innerHandler(requestContext, commandHandler);
+            return innerHandler(requestContextInner, commandHandler);
         } finally {
             commandHandler.destroy();
-            requestContext.clean();
+            requestContextInner.clean();
         }
     }
 
@@ -105,7 +107,7 @@ public class DispatchCommandHandler {
         return body;
     }
 
-    private ResponseContext innerHandler(RequestContext context
+    private ResponseContext innerHandler(RequestContextInner context
             , CommandHandler<?> commandHandler) {
 
         long start = System.currentTimeMillis();
@@ -115,7 +117,7 @@ public class DispatchCommandHandler {
                 , context.getCommandName()
                 , System.currentTimeMillis() - start);
         byte[] bytes = encodeResponseBody(resp
-                , CommandHandlerContainer.getInstance().getCommandContext(context.getCommandName()).getRespEncoderType());
+                , CommandHandlerApplicationContext.getInstance().getCommandContext(context.getCommandName()).getRespEncoderType());
 
         return new ResponseContext(bytes
                 , new DefaultHttpHeaders().add("Content-Type", String.format("%s; charset=UTF-8"

@@ -4,7 +4,7 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import io.elves.core.coder.CoderContainer;
-import io.elves.core.context.RequestContext;
+import io.elves.core.context.RequestContextInner;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.elves.core.ElvesConstants.TEXT_PLAIN_CODER;
-import static io.elves.core.context.RequestContext.COMMAND_TARGET;
+import static io.elves.core.context.RequestContextInner.COMMAND_TARGET;
 
 /**
  * @author lee
@@ -30,10 +30,10 @@ public class BuildRequestContext {
 
     }
 
-    public static RequestContext parseRequest(FullHttpRequest request) {
+    public static RequestContextInner parseRequest(FullHttpRequest request) {
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.uri());
 
-        return RequestContext
+        return RequestContextInner
                 .build()
                 .uri(request.uri())
                 .headers(request.headers())
@@ -43,6 +43,7 @@ public class BuildRequestContext {
                 .param(parseQueryParam(queryStringDecoder))
                 .param(parsePostParam(request))
                 .body(parseBodyByte(request))
+                .method(request.method().name())
                 .metadata(COMMAND_TARGET, parseTarget(queryStringDecoder.rawPath(), request.method()))
                 .builder();
 
