@@ -1,11 +1,11 @@
 package io.elves.core;
 
-import io.elves.core.context.RequestContextInner;
+import io.elves.core.context.RequestContext;
 import io.elves.core.response.CommandResponse;
 
 public interface CommandHandler<R> {
     /**
-     * init command,this method is executed before {@link #handle(RequestContextInner)}
+     * init command,this method is executed before {@link #handle(RequestContext)}
      */
     default void init() {
 
@@ -17,7 +17,7 @@ public interface CommandHandler<R> {
      * @param context request context
      * @return
      */
-    CommandResponse<R> handle(RequestContextInner context);
+    CommandResponse<R> handle(RequestContext context);
 
     /**
      * destroy resource

@@ -1,7 +1,7 @@
 package io.elves.simple.http.server.handle;
 
 import io.elves.core.command.CommandActionMapping;
-import io.elves.core.context.RequestContextInner;
+import io.elves.core.context.RequestContext;
 import io.elves.core.CommandHandler;
 import io.elves.core.request.HttpMethod;
 import io.elves.core.response.CommandResponse;
@@ -14,7 +14,7 @@ import java.util.Map;
 public class HellwordCommandHandlerV3 implements CommandHandler<Map<String, Object>> {
 
     @Override
-    public CommandResponse<Map<String, Object>> handle(RequestContextInner context) {
+    public CommandResponse<Map<String, Object>> handle(RequestContext context) {
         return CommandResponse.ok(context.getParameters());
     }
 }

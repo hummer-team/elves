@@ -89,7 +89,10 @@ public class DispatchV2CommandHandler {
                                     ? e.getCause().getClass().getName()
                                     : e.getClass().getName()))) {
                 intercept.handler(e.getCause(), new RequestContext(requestContextInner.getBodyByte()
-                        , requestContextInner.getHeaders(), requestContextInner.getUrl()));
+                        , requestContextInner.getHeaders()
+                        , requestContextInner.getUrl()
+                        , requestContextInner.getParameters()
+                        , requestContextInner.getDecoder()));
                 return new ResponseContext(new byte[0]
                         , new DefaultHttpHeaders().add("Content-Type", String.format("%s; charset=UTF-8"
                         , requestContextInner.getResponseContentType()))
@@ -131,7 +134,10 @@ public class DispatchV2CommandHandler {
             }
             if (parameter.getType().equals(RequestContext.class)) {
                 RequestContext context = new RequestContext(requestContextInner.getBodyByte()
-                        , requestContextInner.getHeaders(), requestContextInner.getUrl());
+                        , requestContextInner.getHeaders()
+                        , requestContextInner.getUrl()
+                        , requestContextInner.getParameters()
+                        , requestContextInner.getDecoder());
                 params[i] = context;
             }
         }

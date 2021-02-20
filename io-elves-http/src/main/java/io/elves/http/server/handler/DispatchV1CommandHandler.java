@@ -3,12 +3,13 @@ package io.elves.http.server.handler;
 import com.google.common.base.Strings;
 import io.elves.common.exception.CommandException;
 import io.elves.common.util.IpUtil;
+import io.elves.core.CommandHandler;
 import io.elves.core.coder.Coder;
 import io.elves.core.coder.CoderContainer;
 import io.elves.core.command.CommandHandlerApplicationContext;
+import io.elves.core.context.RequestContext;
 import io.elves.core.context.RequestContextInner;
 import io.elves.core.context.ResponseContext;
-import io.elves.core.CommandHandler;
 import io.elves.core.response.CommandResponse;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -111,7 +112,12 @@ public class DispatchV1CommandHandler {
             , CommandHandler<?> commandHandler) {
 
         long start = System.currentTimeMillis();
-        CommandResponse<?> resp = commandHandler.handle(context);
+
+        CommandResponse<?> resp = commandHandler.handle(new RequestContext(context.getBodyByte()
+                , context.getHeaders()
+                , context.getUrl()
+                , context.getParameters()
+                , context.getDecoder()));
 
         log.debug("command {} - cost {} ms"
                 , context.getCommandName()
