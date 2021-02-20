@@ -8,7 +8,7 @@ import io.elves.core.coder.CoderContainer;
 import io.elves.core.command.CommandHandlerApplicationContext;
 import io.elves.core.context.RequestContextInner;
 import io.elves.core.context.ResponseContext;
-import io.elves.core.handle.CommandHandler;
+import io.elves.core.CommandHandler;
 import io.elves.core.response.CommandResponse;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -32,16 +32,16 @@ import static io.netty.handler.codec.http.HttpResponseStatus.NOT_IMPLEMENTED;
  */
 @Slf4j
 @Deprecated
-public class DispatchCommandHandler {
-    public static final DispatchCommandHandler INSTANCE = new DispatchCommandHandler();
+public class DispatchV1CommandHandler {
+    public static final DispatchV1CommandHandler INSTANCE = new DispatchV1CommandHandler();
 
-    private DispatchCommandHandler() {
+    private DispatchV1CommandHandler() {
 
     }
 
     public ResponseContext dispatch(final FullHttpRequest request) {
         setRequestId(request);
-        RequestContextInner requestContextInner = BuildRequestContext.parseRequest(request);
+        RequestContextInner requestContextInner = RequestContextBuild.parseRequest(request);
 
         if (StringUtils.isBlank(requestContextInner.getCommandName())) {
             throw new CommandException(BAD_REQUEST, "Invalid command name.");

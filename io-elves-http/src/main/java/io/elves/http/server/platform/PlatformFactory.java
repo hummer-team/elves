@@ -13,6 +13,9 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @author lee
+ */
 @Slf4j
 public class PlatformFactory {
     private static boolean epollSupport = false;

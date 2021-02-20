@@ -14,10 +14,16 @@ import java.util.List;
 public final class RequestContext {
     private final byte[] body;
     private final HttpHeaders headers;
+    private final String url;
 
-    public RequestContext(byte[] body, HttpHeaders headers) {
+    public RequestContext(byte[] body, HttpHeaders headers, String url) {
         this.body = body;
         this.headers = headers;
+        this.url = url;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public final byte[] getBody() {

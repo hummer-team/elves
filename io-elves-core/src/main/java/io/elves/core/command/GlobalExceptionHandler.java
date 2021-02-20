@@ -29,6 +29,6 @@ public interface GlobalExceptionHandler {
      * response error code
      */
     default HttpResponseStatus code() {
-        return HttpResponseStatus.SERVICE_UNAVAILABLE;
+        return HttpResponseStatus.INTERNAL_SERVER_ERROR;
     }
 }

@@ -2,9 +2,9 @@ package io.elves.core.properties;
 
 import io.elves.common.util.Assert;
 import io.elves.core.ElvesConstants;
-import io.elves.core.life.Life;
-import io.elves.core.life.LifeApplicationContext;
-import io.elves.core.life.LifeX;
+import io.elves.core.scope.ElvesScopeInit;
+import io.elves.core.scope.ElvesScopeApplicationContext;
+import io.elves.core.scope.ElvesScopeAction;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -160,9 +160,9 @@ public class ElvesProperties {
         }
     }
 
-    @LifeX
+    @ElvesScopeAction
     public void registerProperties() {
-        LifeApplicationContext.register(() -> new Life() {
+        ElvesScopeApplicationContext.register(() -> new ElvesScopeInit() {
             @Override
             public void postconstruct() {
 

@@ -1,4 +1,4 @@
-package io.elves.core.life;
+package io.elves.core.scope;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD})
+@Target({ElementType.TYPE})
 @Documented
-public @interface LifeX {
+public @interface ElvesScopeContext {
 }

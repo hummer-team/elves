@@ -10,12 +10,13 @@ import io.elves.core.command.CommandHandlerApplicationContext;
 import io.elves.core.command.CommandHandlerMapping;
 import io.elves.core.command.GlobalException;
 import io.elves.core.command.GlobalExceptionHandler;
-import io.elves.core.life.LifeApplicationContext;
-import io.elves.core.life.LifeX;
-import io.elves.core.log.LogRegister;
+import io.elves.core.scope.ElvesScopeApplicationContext;
+import io.elves.core.scope.ElvesScopeAction;
+import io.elves.core.log.LogDriverInit;
 import io.elves.core.properties.ElvesProperties;
 import io.elves.http.server.banner.Banner;
 import io.elves.http.server.handler.HeartBeatServerHandler;
+import io.elves.http.server.handler.HomePageHandler;
 import io.elves.http.server.handler.Http2OrHttpConfigure;
 import io.elves.http.server.handler.HttpHandler;
 import io.elves.http.server.platform.PlatformFactory;
@@ -53,7 +54,7 @@ public class HttpServer implements ElvesServer {
     public void init(ElvesApplication application) throws Exception {
         long start = System.currentTimeMillis();
         Banner.print();
-        LogRegister.init();
+        LogDriverInit.init();
         ElvesProperties.load();
         registerLifeXAndExecute(application);
         //
@@ -127,7 +128,7 @@ public class HttpServer implements ElvesServer {
         }
 
         try {
-            LifeApplicationContext.destroy();
+            ElvesScopeApplicationContext.destroy();
         } catch (Throwable e) {
             //ignore
         }
@@ -147,7 +148,7 @@ public class HttpServer implements ElvesServer {
         for (Class<?> cl : classes) {
             Method[] methods = cl.getMethods();
             for (Method m : methods) {
-                LifeX life = m.getAnnotation(LifeX.class);
+                ElvesScopeAction life = m.getAnnotation(ElvesScopeAction.class);
                 if (life != null) {
                     try {
                         m.setAccessible(true);
@@ -159,7 +160,7 @@ public class HttpServer implements ElvesServer {
             }
         }
 
-        LifeApplicationContext.postconstruct();
+        ElvesScopeApplicationContext.postconstruct();
     }
 
     private void registerCommand(ElvesApplication application) {

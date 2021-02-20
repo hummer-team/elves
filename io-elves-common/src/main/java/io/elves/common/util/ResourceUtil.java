@@ -15,10 +15,14 @@ import java.net.URLDecoder;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Properties;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+/**
+ * @author edz
+ */
 public class ResourceUtil {
     private static final String CLASSPATH_PREFIX = "classpath:";
 
@@ -37,7 +41,7 @@ public class ResourceUtil {
 
             URL url = (classLoader != null ? classLoader.getResource(path) : ClassLoader.getSystemResource(path));
             if (url == null) {
-                throw new FileNotFoundException("Resource [" + resource + "] does not exist");
+                throw new FileNotFoundException("Resource " + resource + " does not exist");
             }
 
             return url;
@@ -292,5 +296,9 @@ public class ResourceUtil {
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static <S> ServiceLoader<S> getServiceLoader(Class<S> clazz) {
+        return ServiceLoader.load(clazz, clazz.getClassLoader());
     }
 }

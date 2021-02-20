@@ -1,5 +1,6 @@
 package io.elves.http.server.handler;
 
+import com.google.common.base.Strings;
 import io.elves.common.exception.CommandException;
 import io.elves.core.context.ResponseContext;
 import io.netty.buffer.ByteBuf;
@@ -38,7 +39,9 @@ public class H2Handler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static void writeErrorResponse(ChannelHandlerContext ctx
             , HttpResponseStatus status, String errorMessage, String streamId) {
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, status
-                , Unpooled.copiedBuffer(errorMessage, StandardCharsets.UTF_8));
+                , Unpooled.copiedBuffer(Strings.isNullOrEmpty(errorMessage)
+                ? "sys error"
+                : errorMessage, StandardCharsets.UTF_8));
         streamId(response, streamId);
         ctx.writeAndFlush(response);
     }
@@ -66,8 +69,7 @@ public class H2Handler extends SimpleChannelInboundHandler<FullHttpRequest> {
             return;
         }
         try {
-            ResponseContext respContext = DispatchV2CommandHandler.INSTANCE.dispatch(request);
-
+            ResponseContext respContext =  DispatchV2CommandHandler.INSTANCE.dispatch(request);
 
             ByteBuf content = ctx.alloc().buffer(respContext.getBytes().length);
             content.writeBytes(respContext.getBytes());
@@ -79,12 +81,12 @@ public class H2Handler extends SimpleChannelInboundHandler<FullHttpRequest> {
             writeResponse(ctx, streamId, response, HttpUtil.isKeepAlive(request));
 
         } catch (Throwable ex) {
+            log.warn("h2 Internal error", ex);
             HttpResponseStatus status = INTERNAL_SERVER_ERROR;
             if (ex instanceof CommandException) {
                 status = ((CommandException) ex).getStatus();
             }
             writeErrorResponse(ctx, status, ex.getMessage(), streamId);
-            log.warn("h2 Internal error", ex);
         }
     }
 

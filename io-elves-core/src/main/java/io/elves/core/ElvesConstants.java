@@ -1,6 +1,11 @@
 package io.elves.core;
 
-public class ElvesConstants {
+/**
+ * define constants
+ *
+ * @author edz
+ */
+public final class ElvesConstants {
     public static final int DEFAULT_PORT = 10000;
     public static final String FAVICON_PATH = "/favicon.ico";
     public static final String REQUEST_ID_KEY = "requestId";

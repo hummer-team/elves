@@ -25,8 +25,8 @@ import static io.elves.core.context.RequestContextInner.COMMAND_TARGET;
 /**
  * @author lee
  */
-public class BuildRequestContext {
-    private BuildRequestContext() {
+public class RequestContextBuild {
+    private RequestContextBuild() {
 
     }
 
@@ -109,7 +109,7 @@ public class BuildRequestContext {
 
     private static Map<String, String> parseQueryParam(QueryStringDecoder queryStringDecoder) {
         Map<String, List<String>> paramMap = queryStringDecoder.parameters();
-        Map<String, String> temp = new ConcurrentHashMap<>();
+        Map<String, String> temp = new ConcurrentHashMap<>(16);
         // Parse request parameters.
         if (!paramMap.isEmpty()) {
             for (Map.Entry<String, List<String>> p : paramMap.entrySet()) {

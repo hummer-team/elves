@@ -1,6 +1,6 @@
 package io.elves.core.command;
 
-import io.elves.core.handle.CommandHandler;
+import io.elves.core.CommandHandler;
 import io.elves.core.request.HttpMethod;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

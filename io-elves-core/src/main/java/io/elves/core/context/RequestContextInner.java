@@ -30,18 +30,18 @@ public class RequestContextInner {
     private byte[] body;
     private String method;
     private Coder decoder;
-    private String uri;
+    private String url;
 
     public static RequestContextInner build() {
         return new RequestContextInner();
     }
 
-    public String getUri() {
-        return uri;
+    public String getUrl() {
+        return url;
     }
 
     public RequestContextInner uri(String uri) {
-        this.uri = uri;
+        this.url = uri;
         return this;
     }
 
@@ -55,7 +55,7 @@ public class RequestContextInner {
 
     public Coder getDecoder() {
         if (decoder == null) {
-            throw new IllegalArgumentException("request " + uri + " decoder not found");
+            throw new IllegalArgumentException("request " + url + " decoder not found");
         }
         return decoder;
     }

@@ -11,7 +11,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <netty.version>4.1.52.Final</netty.version>
+        <netty.version>4.1.59.Final</netty.version>
         <slf4j-api.version>1.7.30</slf4j-api.version>
         <io.elves.version>1.0-SNAPSHOT</io.elves.version>
         <commons-lang3.version>3.10</commons-lang3.version>
@@ -22,7 +22,7 @@
         <protostuff.version>1.7.2</protostuff.version>
         <npn-api.version>1.1.1.v20141010</npn-api.version>
         <alpn-api.version>1.1.2.v20150522</alpn-api.version>
-        <netty-tcnative.version>2.0.34.Final</netty-tcnative.version>
+        <netty-tcnative.version>2.0.36.Final</netty-tcnative.version>
         <conscrypt-openjdk-uber.version>2.4.0</conscrypt-openjdk-uber.version>
         <conscrypt.classifier />
         <os.detected.classifier>osx-x86_64</os.detected.classifier>
@@ -40,6 +40,7 @@
         <maven.javadoc.version>3.2.0</maven.javadoc.version>
         <protobuf-java.version>2.6.1</protobuf-java.version>
         <protobuf-javanano.version>3.0.0-alpha-5</protobuf-javanano.version>
+        <log4j.version>2.13.3</log4j.version>
     </properties>
     <modules>
         <module>io-elves-http</module>
@@ -111,11 +112,6 @@
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
-                <artifactId>netty-all</artifactId>
-                <version>${netty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.netty</groupId>
                 <artifactId>netty-bom</artifactId>
                 <version>${netty.version}</version>
                 <type>pom</type>
@@ -129,19 +125,19 @@
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-slf4j-impl</artifactId>
-                <version>2.13.3</version>
+                <version>${log4j.version}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-core</artifactId>
-                <version>2.13.3</version>
+                <version>${log4j.version}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-jul</artifactId>
-                <version>2.13.3</version>
+                <version>${log4j.version}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
@@ -198,22 +194,6 @@
                 <version>${alpn-api.version}</version>
                 <scope>provided</scope> <!-- Provided by alpn-boot -->
             </dependency>
-
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-codec-http2</artifactId>
-                <version>${netty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-handler</artifactId>
-                <version>${netty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-handler-proxy</artifactId>
-                <version>${netty.version}</version>
-            </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-transport-native-epoll</artifactId>
@@ -241,6 +221,7 @@
                 </exclusions>
                 <optional>true</optional>
             </dependency>
+            <!--ssl-->
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-tcnative</artifactId>

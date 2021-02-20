@@ -49,7 +49,7 @@ public class DispatchV2CommandHandler {
 
     public ResponseContext dispatch(final FullHttpRequest request) {
         setRequestId(request);
-        RequestContextInner requestContextInner = BuildRequestContext.parseRequest(request);
+        RequestContextInner requestContextInner = RequestContextBuild.parseRequest(request);
 
         if (StringUtils.isBlank(requestContextInner.getCommandName())) {
             throw new CommandException(BAD_REQUEST, "invalid command name.");
@@ -59,7 +59,7 @@ public class DispatchV2CommandHandler {
                 .getCommandContext(requestContextInner.getCommandName());
         if (commandConext == null) {
             throw new CommandException(NOT_FOUND, String.format("this bad request not found url: \"%s - %s\""
-                    , requestContextInner.getUri(), requestContextInner.getMethod()));
+                    , requestContextInner.getUrl(), requestContextInner.getMethod()));
         }
 
         try {
@@ -84,16 +84,19 @@ public class DispatchV2CommandHandler {
         if (intercept != null) {
             if (CollectionUtils.isEmpty(intercept.filter())
                     || Iterables.any(intercept.filter()
-                    , ex -> ex.getName().equals(e.getCause().getClass().getName()))) {
-                intercept.handler(e, new RequestContext(requestContextInner.getBodyByte()
-                        , requestContextInner.getHeaders()));
+                    , ex -> ex.getName().equals(
+                            e.getCause() != null
+                                    ? e.getCause().getClass().getName()
+                                    : e.getClass().getName()))) {
+                intercept.handler(e.getCause(), new RequestContext(requestContextInner.getBodyByte()
+                        , requestContextInner.getHeaders(), requestContextInner.getUrl()));
                 return new ResponseContext(new byte[0]
                         , new DefaultHttpHeaders().add("Content-Type", String.format("%s; charset=UTF-8"
                         , requestContextInner.getResponseContentType()))
                         , intercept.code());
             }
         }
-        log.error("execute {} failed", requestContextInner.getUri(), e);
+        log.error("execute {} failed", requestContextInner.getUrl(), e);
         throw new RuntimeException(e);
     }
 
@@ -128,7 +131,7 @@ public class DispatchV2CommandHandler {
             }
             if (parameter.getType().equals(RequestContext.class)) {
                 RequestContext context = new RequestContext(requestContextInner.getBodyByte()
-                        , requestContextInner.getHeaders());
+                        , requestContextInner.getHeaders(), requestContextInner.getUrl());
                 params[i] = context;
             }
         }

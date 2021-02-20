@@ -1,8 +1,8 @@
 package io.elves.core.command;
 
 import com.google.common.collect.ImmutableMap;
-import io.elves.core.handle.CommandHandler;
-import io.elves.core.util.ServiceLoaderUtil;
+import io.elves.common.util.ResourceUtil;
+import io.elves.core.CommandHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CommandHandlerApplicationContext {
     private final static CommandHandlerApplicationContext INSTANCE = new CommandHandlerApplicationContext();
     private final static Map<String, CommandConext> HANDLER_MAP = new ConcurrentHashMap<>();
-    private final ServiceLoader<CommandHandler> serviceLoader = ServiceLoaderUtil.getServiceLoader(CommandHandler.class);
+    private final ServiceLoader<CommandHandler> serviceLoader = ResourceUtil.getServiceLoader(CommandHandler.class);
     private GlobalExceptionHandler exceptionIntercept;
 
     public static CommandHandlerApplicationContext getInstance() {
