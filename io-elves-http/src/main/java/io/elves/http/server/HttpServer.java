@@ -3,6 +3,7 @@ package io.elves.http.server;
 import com.google.common.base.Strings;
 import io.elves.common.util.ResourceUtil;
 import io.elves.core.ElvesApplication;
+import io.elves.core.ElvesConstants;
 import io.elves.core.ElvesServer;
 import io.elves.core.command.CommandActionMapping;
 import io.elves.core.command.CommandConext;
@@ -10,13 +11,12 @@ import io.elves.core.command.CommandHandlerApplicationContext;
 import io.elves.core.command.CommandHandlerMapping;
 import io.elves.core.command.GlobalException;
 import io.elves.core.command.GlobalExceptionHandler;
-import io.elves.core.scope.ElvesScopeApplicationContext;
-import io.elves.core.scope.ElvesScopeAction;
 import io.elves.core.log.LogDriverInit;
 import io.elves.core.properties.ElvesProperties;
+import io.elves.core.scope.ElvesScopeAction;
+import io.elves.core.scope.ElvesScopeApplicationContext;
 import io.elves.http.server.banner.Banner;
 import io.elves.http.server.handler.HeartBeatServerHandler;
-import io.elves.http.server.handler.HomePageHandler;
 import io.elves.http.server.handler.Http2OrHttpConfigure;
 import io.elves.http.server.handler.HttpHandler;
 import io.elves.http.server.platform.PlatformFactory;
@@ -52,6 +52,11 @@ public class HttpServer implements ElvesServer {
 
     @Override
     public void init(ElvesApplication application) throws Exception {
+        String active = System.getProperty(ElvesConstants.PROFILES_ACTIVE);
+        if (Strings.isNullOrEmpty(active)) {
+            System.setProperty(ElvesConstants.PROFILES_ACTIVE, "dev");
+            System.err.println("please settings profiles active,dev or test or prod,default use dev");
+        }
         long start = System.currentTimeMillis();
         Banner.print();
         LogDriverInit.init();
@@ -176,7 +181,7 @@ public class HttpServer implements ElvesServer {
                 Object exObj = ResourceUtil.tryInstance(cl);
                 if (exObj instanceof GlobalExceptionHandler) {
                     CommandHandlerApplicationContext.getInstance()
-                            .registerExceptionIntercept((GlobalExceptionHandler)exObj);
+                            .registerExceptionIntercept((GlobalExceptionHandler) exObj);
                 }
             }
             //scan handler controller
