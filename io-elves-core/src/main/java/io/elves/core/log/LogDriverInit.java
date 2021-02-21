@@ -20,6 +20,7 @@ public class LogDriverInit {
                 , System.getProperty(ElvesConstants.PROFILES_ACTIVE));
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         Configurator.initialize(logConfigFileName, cl, cl.getResource(logConfigFileName).toURI());
+        cl = cl == null ? ClassLoader.getSystemClassLoader() : cl;
         Thread.currentThread().setContextClassLoader(cl);
     }
 }

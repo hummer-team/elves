@@ -89,7 +89,6 @@
 		<Logger name="com.google" level="error" />
 		<Logger name="com.alibaba.fastjson" level="error" />
 		<Root level="debug">
-			<appender-ref ref="Console" />
 			<appender-ref ref="LogstashFile" />
 			<appender-ref ref="RollingErrorFile" />
 		</Root>
