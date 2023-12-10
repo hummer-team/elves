@@ -16,7 +16,7 @@
         <io.elves.version>1.0-SNAPSHOT</io.elves.version>
         <commons-lang3.version>3.10</commons-lang3.version>
         <guava.version>29.0-jre</guava.version>
-        <lombok.version>1.18.8</lombok.version>
+        <lombok.version>1.18.30</lombok.version>
         <fastjson.version>1.2.71</fastjson.version>
         <commons-io.version>2.6</commons-io.version>
         <protostuff.version>1.7.2</protostuff.version>
@@ -41,6 +41,7 @@
         <protobuf-java.version>2.6.1</protobuf-java.version>
         <protobuf-javanano.version>3.0.0-alpha-5</protobuf-javanano.version>
         <log4j.version>2.13.3</log4j.version>
+        <maven-deploy-plugin.version>3.1.1</maven-deploy-plugin.version>
     </properties>
     <modules>
         <module>io-elves-http</module>
@@ -49,33 +50,6 @@
         <module>io-elves-simple-http-server</module>
         <module>io-elves-all</module>
     </modules>
-
-    <distributionManagement>
-        <repository>
-            <id>maven-releases</id>
-            <url>http://10.10.10.250:8081/repository/maven-releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>nexus-snapshots</id>
-            <url>http://10.10.10.250:8081/repository/maven-snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
-
-    <repositories>
-        <repository>
-            <id>ygfmaven</id>
-            <name>maven-public</name>
-            <url>http://10.10.10.250:8081/repository/maven-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-    </repositories>
 
     <dependencyManagement>
         <dependencies>
@@ -292,6 +266,11 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>${maven-deploy-plugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -328,6 +307,10 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
